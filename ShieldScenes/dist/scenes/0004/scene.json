@@ -1,0 +1,323 @@
+{
+  "id": "0004",
+  "title": "Work Stream 3: The Designers ('StageCraft' Volume)",
+  "sourceImage": "../../pages/0004.png",
+  "canvasSize": [
+    1920,
+    1080
+  ],
+  "camera": {
+    "type": "perspective",
+    "fov": 45,
+    "position": [
+      0,
+      0,
+      230.39999999999998
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ],
+    "near": 1,
+    "far": 5000
+  },
+  "environment": {
+    "background": "#050505",
+    "fog": {
+      "enabled": true,
+      "near": 115.19999999999999,
+      "far": 691.1999999999999
+    },
+    "post": {
+      "bloom": true,
+      "vignette": true,
+      "filmGrain": 0.08
+    }
+  },
+  "lights": [
+    {
+      "type": "hemisphere",
+      "intensity": 0.55
+    },
+    {
+      "type": "directional",
+      "position": [
+        500,
+        900,
+        400
+      ],
+      "intensity": 1.1,
+      "shadows": true
+    },
+    {
+      "type": "point",
+      "position": [
+        -350,
+        200,
+        500
+      ],
+      "intensity": 0.45
+    }
+  ],
+  "assets": {
+    "textures": [
+      {
+        "id": "page",
+        "src": "../../pages/0004.png"
+      }
+    ],
+    "ldraw": []
+  },
+  "entities": [
+    {
+      "id": "bg",
+      "type": "plane",
+      "texture": "page",
+      "size": [
+        192.0,
+        108.0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": false,
+        "opacity": 1,
+        "emissive": 0.04
+      }
+    },
+    {
+      "id": "cut-01",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.08333333333333333,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        -64.0,
+        36.0,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.15
+      }
+    },
+    {
+      "id": "cut-02",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.4166666666666667,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        0.0,
+        36.0,
+        51.42857142857143
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.13999999999999999
+      }
+    },
+    {
+      "id": "cut-03",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.75,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        64.0,
+        36.0,
+        82.85714285714286
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.13
+      }
+    }
+  ],
+  "navigation": {
+    "snapPoints": [
+      {
+        "name": "front",
+        "cameraPos": [
+          0,
+          0,
+          230.39999999999998
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "oblique",
+        "cameraPos": [
+          115.19999999999999,
+          69.11999999999999,
+          184.32
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "tour": [
+      {
+        "focusEntity": "cut-01",
+        "seconds": 2.5
+      },
+      {
+        "focusEntity": "cut-02",
+        "seconds": 2.5
+      }
+    ]
+  },
+  "motion": {
+    "float": {
+      "enabled": true,
+      "amplitude": 1.6,
+      "speed": 0.25
+    },
+    "drift": {
+      "enabled": true,
+      "strength": 0.35
+    }
+  },
+  "legos": {
+    "title": "StageCraft Volume",
+    "description": "Establish the Spatial Interface with a Cosmos Dome.",
+    "location": "The Unreal Void",
+    "entities": [
+      {
+        "id": "e_dome",
+        "type": "structure",
+        "name": "Starry Dome",
+        "material": "Cosmos"
+      },
+      {
+        "id": "e_rings",
+        "type": "structure",
+        "name": "5 Concentric Rings",
+        "shape": "Circular Platforms"
+      },
+      {
+        "id": "e_forge",
+        "type": "source",
+        "name": "Central Forge Light",
+        "element": "Fire"
+      },
+      {
+        "id": "e_user",
+        "type": "cameraman",
+        "name": "User Vantage",
+        "action": "Walking on the Shield"
+      }
+    ],
+    "goals": [
+      {
+        "id": "g_spatial",
+        "name": "Define Scale & Navigation",
+        "owner": "e_user"
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "o_confusion",
+        "name": "Confusing Shape (Sphere vs Disk)",
+        "affects": "g_spatial"
+      }
+    ],
+    "shifts": [
+      {
+        "id": "s_blockout",
+        "name": "Blocking Out the World",
+        "causes": [
+          "e_rings",
+          "e_dome"
+        ],
+        "results_in": "g_spatial"
+      }
+    ],
+    "relations": [
+      "[encloses] e_dome -> e_rings",
+      "[illuminates] e_forge -> e_rings",
+      "[navigates] e_user -> e_rings"
+    ],
+    "timeline": [
+      {
+        "id": "t_build",
+        "description": "Building the Volume",
+        "scenes": [
+          {
+            "id": "sc_center",
+            "description": "Placing the Forge Light"
+          },
+          {
+            "id": "sc_rings",
+            "description": "Extruding the 5 Rings"
+          },
+          {
+            "id": "sc_dome",
+            "description": "Capping with the Cosmos"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+0 FILE 0006.ldr
+0 The Humanists
+0 Name: 0006.ldr
+0 Author: Grace Master Builder
+0 !LDRAW_ORG Model
+0 !LICENCE Redistributable under CCAL version 2.0
+0 BFC CERTIFY CCW
+0 //
+0 LEGOS FRAMEWORK:
+0 Location: The Library of Logic
+0 Entity: Essays, Schema Cube, JSON Artifact
+0 Goal: Code-Compliant Logic
+0 Obstacle: Vague Descriptions
+0 Shift: Distillation of Truth
+0 //
+0 STEP 01: FLOOR
+1  14   0    0   0   1 0 0   0 1 0   0 0 1  3811.dat
+0 STEP
+0 STEP 02: STACK OF BOOKS (Essays)
+1 296 -60 0 -20 1 0 0 0 1 0 0 0 1 3004.dat
+1 84 -60 10 -20 0 0 -1 0 1 0 1 0 0 3004.dat
+1 72 -60 20 -20 1 0 0 0 1 0 0 0 1 3004.dat
+0 STEP
+0 STEP 03: THE SCHEMA CUBE
+0 // Gold box representing logic
+1 296 0 0 0 1 0 0 0 1 0 0 0 1 43888.dat
+0 STEP
+0 STEP 04: JSON OUTPUT
+0 // Computer Screen
+1 1 60 0 -10 1 0 0 0 1 0 0 0 1 3039.dat
+1 15 60 -10 -10 1 0 0 0 1 0 0 0 1 3020.dat
+0 STEP
+0 STEP 05: ARROW
+0 // Indicating flow
+1 14 30 0 0 0 0 1 0 1 0 -1 0 0 3069b.dat
+0 STEP
+0 NOFILE

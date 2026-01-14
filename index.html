@@ -1,0 +1,1486 @@
+<!--
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                        RADIO↔TV IMAGE MACHINE                                  ║
+║                    A Holographic Archive Instrument                            ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║  FOLDER LAYOUT:                                                                ║
+║    /TMM/                                                                       ║
+║      ├── index.html           (this file)                                      ║
+║      ├── media-manifest.json  (optional - auto-generates if missing)          ║
+║      └── [Family Folders]/    (each contains numbered PNG slides)             ║
+║                                                                                ║
+║  MANIFEST FORMAT: See DEMO_MANIFEST below for complete structure              ║
+║                                                                                ║
+║  CONTROLS:                                                                     ║
+║    Mouse: Orbit (drag), Zoom (scroll), Click stack to focus                   ║
+║    WASD/Arrows: Navigate | Space: Play/Pause | F: Fullscreen                  ║
+║    C: Constellation | S: Stack | D: Dual Rig | T: Trajectory                  ║
+║    1/2/3: Deck/Strata/Burst modes | R: Radio-only | Esc: Exit mode            ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Radio↔TV Image Machine</title>
+<style>
+:root {
+  --bg-void: #05080a;
+  --glow-primary: #00ffff;
+  --glow-secondary: #ff00ff;
+  --glow-accent: #ffcc00;
+  --text-primary: #e0f0ff;
+  --text-dim: #607080;
+  --panel-bg: rgba(10, 20, 30, 0.85);
+  --scanline-opacity: 0.03;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#canvas-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+#canvas-container canvas { display: block; }
+
+/* Scanline overlay */
+#scanlines {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 255, var(--scanline-opacity)) 2px,
+    rgba(0, 255, 255, var(--scanline-opacity)) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* HUD Container */
+#hud {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+#hud > * { pointer-events: auto; }
+
+/* Top Bar */
+#top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, var(--panel-bg) 0%, transparent 100%);
+}
+
+#logo {
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--glow-primary);
+  text-shadow: 0 0 10px var(--glow-primary);
+}
+
+#mode-indicator {
+  font-size: 12px;
+  padding: 4px 12px;
+  border: 1px solid var(--glow-primary);
+  border-radius: 2px;
+  color: var(--glow-primary);
+}
+
+/* Main Content Area */
+#main-area {
+  flex: 1;
+  display: flex;
+  pointer-events: none;
+}
+
+/* Left Rail */
+#left-rail {
+  width: 240px;
+  padding: 20px;
+  background: linear-gradient(90deg, var(--panel-bg) 0%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  pointer-events: auto;
+  transform: translateX(-200px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+#left-rail.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+#search-box {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid var(--glow-primary);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+#search-box::placeholder { color: var(--text-dim); }
+
+.rail-section h3 {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.family-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.family-item {
+  font-size: 11px;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.family-item:hover {
+  background: rgba(0, 255, 255, 0.1);
+  border-left-color: var(--glow-primary);
+}
+
+.family-item.active {
+  background: rgba(0, 255, 255, 0.2);
+  border-left-color: var(--glow-accent);
+}
+
+/* Right Rail */
+#right-rail {
+  width: 60px;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.mode-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--panel-bg);
+  border: 1px solid var(--text-dim);
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  border-color: var(--glow-primary);
+  color: var(--glow-primary);
+}
+
+.mode-btn.active {
+  background: rgba(0, 255, 255, 0.2);
+  border-color: var(--glow-primary);
+  color: var(--glow-primary);
+  box-shadow: 0 0 10px var(--glow-primary);
+}
+
+/* Bottom Bar */
+#bottom-bar {
+  padding: 12px 20px;
+  background: linear-gradient(0deg, var(--panel-bg) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  pointer-events: auto;
+}
+
+#radio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.radio-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--text-dim);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.radio-btn:hover {
+  border-color: var(--glow-secondary);
+  color: var(--glow-secondary);
+}
+
+.radio-btn.playing {
+  border-color: var(--glow-secondary);
+  color: var(--glow-secondary);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 5px var(--glow-secondary); }
+  50% { box-shadow: 0 0 15px var(--glow-secondary); }
+}
+
+#station-name {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 120px;
+}
+
+#volume-slider {
+  width: 80px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: var(--text-dim);
+  outline: none;
+}
+
+#volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--glow-secondary);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+#waveform {
+  flex: 1;
+  height: 40px;
+  max-width: 400px;
+}
+
+#waveform canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Stack Info Panel */
+#stack-info {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-bg);
+  border: 1px solid var(--glow-primary);
+  padding: 16px 24px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 15;
+}
+
+#stack-info.visible { opacity: 1; }
+
+#stack-title {
+  font-size: 16px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  color: var(--glow-primary);
+}
+
+#stack-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+#slide-counter {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+#grammar-modes {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.grammar-btn {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--text-dim);
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grammar-btn:hover, .grammar-btn.active {
+  border-color: var(--glow-accent);
+  color: var(--glow-accent);
+}
+
+/* Radio Cursor */
+#radio-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--glow-secondary) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.3s;
+}
+
+#radio-cursor.active { opacity: 0.5; }
+
+/* Dual Rig */
+#dual-rig {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none;
+  z-index: 8;
+}
+
+#dual-rig.active { display: flex; }
+
+.rig-pane {
+  flex: 1;
+  position: relative;
+  border: 1px solid var(--text-dim);
+}
+
+.rig-pane canvas { width: 100%; height: 100%; }
+
+#rig-divider {
+  width: 40px;
+  background: var(--panel-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+#crossfader {
+  width: 20px;
+  height: 100px;
+  -webkit-appearance: slider-vertical;
+  background: var(--text-dim);
+}
+
+/* Fallback Grid */
+#fallback-grid {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--bg-void);
+  overflow-y: auto;
+  padding: 60px 20px;
+  z-index: 100;
+}
+
+#fallback-grid.active { display: block; }
+
+.fallback-family {
+  margin-bottom: 40px;
+}
+
+.fallback-family h2 {
+  font-size: 14px;
+  color: var(--glow-primary);
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+.fallback-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.fallback-item {
+  aspect-ratio: 16/9;
+  background: var(--panel-bg);
+  border: 1px solid var(--text-dim);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.fallback-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  transition: all 0.3s;
+}
+
+.fallback-item:hover img {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.fallback-item-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px;
+  background: linear-gradient(transparent, var(--bg-void));
+  font-size: 10px;
+}
+
+/* Loading */
+#loading {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--bg-void);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 200;
+}
+
+#loading.hidden { display: none; }
+
+#loading-text {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--glow-primary);
+  animation: flicker 2s infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading-bar {
+  width: 200px;
+  height: 2px;
+  background: var(--text-dim);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  background: var(--glow-primary);
+  animation: loading-sweep 1s infinite linear;
+}
+
+@keyframes loading-sweep {
+  0% { left: -50%; }
+  100% { left: 100%; }
+}
+
+/* Trajectory overlay */
+#trajectory-overlay {
+  position: fixed;
+  top: 60px;
+  right: 80px;
+  background: var(--panel-bg);
+  border: 1px solid var(--glow-accent);
+  padding: 12px;
+  display: none;
+  z-index: 15;
+}
+
+#trajectory-overlay.visible { display: block; }
+
+#trajectory-overlay h4 {
+  font-size: 10px;
+  color: var(--glow-accent);
+  margin-bottom: 8px;
+}
+
+.trajectory-item {
+  font-size: 10px;
+  padding: 4px 0;
+  color: var(--text-dim);
+}
+
+.trajectory-item.current {
+  color: var(--glow-accent);
+}
+
+/* Radio Only Mode */
+body.radio-only #hud { opacity: 0.1; }
+body.radio-only #scanlines { opacity: 0.5; }
+body.radio-only #canvas-container { filter: brightness(0.2); }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div id="loading-text">INITIALIZING HOLOGRAPHIC FIELD</div>
+  <div class="loading-bar"></div>
+</div>
+
+<div id="canvas-container"></div>
+<div id="scanlines"></div>
+<div id="radio-cursor"></div>
+
+<div id="hud">
+  <div id="top-bar">
+    <div id="logo">RADIO↔TV</div>
+    <div id="mode-indicator">CONSTELLATION</div>
+  </div>
+  
+  <div id="main-area">
+    <div id="left-rail">
+      <input type="text" id="search-box" placeholder="SEARCH...">
+      <div class="rail-section">
+        <h3>FAMILIES</h3>
+        <div class="family-list" id="family-list"></div>
+      </div>
+      <div class="rail-section">
+        <h3>FILTERS</h3>
+        <label style="font-size:11px;display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="filter-highlights"> HIGHLIGHTS ONLY
+        </label>
+      </div>
+    </div>
+    
+    <div style="flex:1;"></div>
+    
+    <div id="right-rail">
+      <button class="mode-btn active" data-mode="constellation" title="Constellation [C]">CON</button>
+      <button class="mode-btn" data-mode="stack" title="Stack [S]">STK</button>
+      <button class="mode-btn" data-mode="dual" title="Dual Rig [D]">DUO</button>
+      <button class="mode-btn" data-mode="trajectory" title="Trajectory [T]">TRJ</button>
+      <div style="flex:1;"></div>
+      <button class="mode-btn" id="toggle-rail" title="Toggle Panel [Tab]">☰</button>
+    </div>
+  </div>
+  
+  <div id="bottom-bar">
+    <div id="radio-controls">
+      <button class="radio-btn" id="radio-prev" title="Previous">⏮</button>
+      <button class="radio-btn" id="radio-play" title="Play/Pause [Space]">▶</button>
+      <button class="radio-btn" id="radio-next" title="Next">⏭</button>
+    </div>
+    <span id="station-name">AMBIENT DRONE</span>
+    <input type="range" id="volume-slider" min="0" max="100" value="50">
+    <div id="waveform"><canvas id="waveform-canvas"></canvas></div>
+    <button class="radio-btn" id="radio-only-btn" title="Radio Only [R]">📻</button>
+  </div>
+</div>
+
+<div id="stack-info">
+  <div id="stack-title">PRESENTATION TITLE</div>
+  <div id="stack-meta">9 slides • 2025</div>
+  <div id="slide-counter">1 / 9</div>
+  <div id="grammar-modes">
+    <button class="grammar-btn active" data-grammar="deck">DECK</button>
+    <button class="grammar-btn" data-grammar="strata">STRATA</button>
+    <button class="grammar-btn" data-grammar="burst">BURST</button>
+  </div>
+</div>
+
+<div id="trajectory-overlay">
+  <h4>TRAJECTORY</h4>
+  <div id="trajectory-list"></div>
+</div>
+
+<div id="dual-rig">
+  <div class="rig-pane" id="rig-left"></div>
+  <div id="rig-divider">
+    <span style="font-size:10px;color:var(--text-dim);">L</span>
+    <input type="range" id="crossfader" orient="vertical" min="0" max="100" value="50">
+    <span style="font-size:10px;color:var(--text-dim);">R</span>
+    <button class="mode-btn" id="sync-toggle" title="Sync">SYN</button>
+  </div>
+  <div class="rig-pane" id="rig-right"></div>
+</div>
+
+<div id="fallback-grid"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DEMO MANIFEST - Used when media-manifest.json is not found
+// ═══════════════════════════════════════════════════════════════════════════
+const DEMO_MANIFEST = {
+  families: [
+    {
+      name: "Algorithmic Colonization",
+      items: [
+        { id: "algo-col-self", title: "Algorithmic Colonization of Self", type: "images", path: "Algorithmic Colonization of Self", slides: 9, tags: ["ai", "identity"], date: "2025-01-01", grammar: "STRATA" },
+        { id: "algo-col-narrative", title: "Algorithmic Colonization of the Narrative Self", type: "images", path: "Algorithmic Colonization of the Narrative Self", slides: 9, tags: ["ai", "narrative"], date: "2025-01-01", grammar: "DECK" },
+        { id: "algo-col-full", title: "The Algorithmic Colonization of the Narrative Self", type: "images", path: "The Algorithmic Colonization of the Narrative Self", slides: 27, tags: ["ai", "narrative", "full"], date: "2025-01-01", grammar: "STRATA" }
+      ],
+      radio: { mode: "ambient", tracks: [] }
+    },
+    {
+      name: "Brick-Built Media",
+      items: [
+        { id: "brick-myths", title: "Brick-Built Media Myths", type: "images", path: "Brick-Built Media Myths", slides: 9, tags: ["lego", "myth"], date: "2025-01-01", grammar: "BURST" },
+        { id: "brick-odyssey-1", title: "Brick-Built Media Odyssey (1)", type: "images", path: "Brick-Built Media Odyssey (1)", slides: 9, tags: ["lego", "odyssey"], date: "2025-01-01", grammar: "DECK" },
+        { id: "brick-odyssey-2", title: "Brick-Built Media Odyssey (2)", type: "images", path: "Brick-Built Media Odyssey (2)", slides: 9, tags: ["lego", "odyssey"], date: "2025-01-01", grammar: "DECK" }
+      ],
+      radio: { mode: "playlist", tracks: [] }
+    },
+    {
+      name: "Crisis & Machines",
+      items: [
+        { id: "crisis-machines", title: "Crisis Machines", type: "images", path: "Crisis Machines", slides: 9, tags: ["crisis", "technology"], date: "2025-01-01", grammar: "STRATA" },
+        { id: "crisis-html", title: "Crisis Machines (HTML)", type: "images", path: "_mnt_okcomputer_output_crisis_machines.pptx.html (4) 2", slides: 12, tags: ["crisis", "html"], date: "2025-01-01", grammar: "DECK" }
+      ],
+      radio: { mode: "ambient", tracks: [] }
+    },
+    {
+      name: "The Fourth Shield",
+      items: [
+        { id: "fourth-shield", title: "The Fourth Shield", type: "images", path: "The Fourth Shield", slides: 9, tags: ["shield", "defense"], date: "2025-01-01", grammar: "BURST" },
+        { id: "forge-shield", title: "Forge the Fourth Shield", type: "images", path: "Forge the Fourth Shield", slides: 9, tags: ["shield", "forge"], date: "2025-01-01", grammar: "DECK" },
+        { id: "achilles-pipeline", title: "Shield of Achilles Production Pipeline", type: "images", path: "Shield of Achilles Production Pipeline", slides: 9, tags: ["shield", "production"], date: "2025-01-01", grammar: "STRATA" }
+      ],
+      radio: { mode: "off", tracks: [] }
+    },
+    {
+      name: "Architecture of Agency",
+      items: [
+        { id: "arch-agency", title: "The Architecture of Agency", type: "images", path: "The Architecture of Agency", slides: 9, tags: ["agency", "architecture"], date: "2025-01-01", grammar: "STRATA" }
+      ],
+      radio: { mode: "ambient", tracks: [] }
+    }
+  ],
+  radioStations: [
+    { id: "ambient", title: "Ambient Drone", tracks: [] },
+    { id: "noise", title: "Digital Noise", tracks: [] }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════════════════════════
+const STATE = {
+  manifest: null,
+  viewMode: 'constellation', // constellation, stack, dual, trajectory
+  currentStack: null,
+  currentSlide: 0,
+  grammar: 'deck', // deck, strata, burst
+  isPlaying: false,
+  radioOnly: false,
+  highlights: JSON.parse(localStorage.getItem('rtv-highlights') || '[]'),
+  trajectories: JSON.parse(localStorage.getItem('rtv-trajectories') || '[]'),
+  currentTrajectory: null,
+  trajectoryIndex: 0,
+  dualSync: false
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// THREE.JS SCENE
+// ═══════════════════════════════════════════════════════════════════════════
+let scene, camera, renderer, controls;
+let stacks = new Map();
+let textureLoader;
+let loadedTextures = new Map();
+let animationFrame;
+
+function initScene() {
+  const container = document.getElementById('canvas-container');
+  
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x05080a);
+  scene.fog = new THREE.FogExp2(0x05080a, 0.015);
+  
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 10, 30);
+  
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+  
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.minDistance = 5;
+  controls.maxDistance = 100;
+  controls.maxPolarAngle = Math.PI * 0.85;
+  
+  // Ambient light
+  const ambient = new THREE.AmbientLight(0x404060, 0.5);
+  scene.add(ambient);
+  
+  // Point lights for glow effect
+  const pointLight1 = new THREE.PointLight(0x00ffff, 1, 50);
+  pointLight1.position.set(10, 10, 10);
+  scene.add(pointLight1);
+  
+  const pointLight2 = new THREE.PointLight(0xff00ff, 0.5, 50);
+  pointLight2.position.set(-10, -10, -10);
+  scene.add(pointLight2);
+  
+  textureLoader = new THREE.TextureLoader();
+  
+  window.addEventListener('resize', onResize);
+  renderer.domElement.addEventListener('click', onCanvasClick);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STACK CREATION
+// ═══════════════════════════════════════════════════════════════════════════
+function createStack(item, position) {
+  const group = new THREE.Group();
+  group.position.copy(position);
+  group.userData = { item, slides: [], currentSlide: 0 };
+  
+  const planeCount = Math.min(item.slides, 8);
+  const spacing = 0.3;
+  
+  for (let i = 0; i < planeCount; i++) {
+    const geometry = new THREE.PlaneGeometry(4, 3);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x00ffff,
+      emissive: 0x003333,
+      emissiveIntensity: 0.2,
+      transparent: true,
+      opacity: 0.7 - (i * 0.08),
+      side: THREE.DoubleSide,
+      roughness: 0.3,
+      metalness: 0.5
+    });
+    
+    const plane = new THREE.Mesh(geometry, material);
+    plane.position.z = -i * spacing;
+    plane.position.x = (Math.random() - 0.5) * 0.1;
+    plane.position.y = (Math.random() - 0.5) * 0.1;
+    plane.rotation.y = (Math.random() - 0.5) * 0.02;
+    
+    group.add(plane);
+    group.userData.slides.push(plane);
+  }
+  
+  // Title label
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#00ffff';
+  ctx.font = 'bold 24px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText(item.title.substring(0, 30), 256, 40);
+  
+  const labelTexture = new THREE.CanvasTexture(canvas);
+  const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
+  const label = new THREE.Sprite(labelMaterial);
+  label.position.y = -2.2;
+  label.scale.set(4, 0.5, 1);
+  group.add(label);
+  
+  // Glow ring
+  const ringGeometry = new THREE.RingGeometry(2.5, 2.7, 32);
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color: 0x00ffff,
+    transparent: true,
+    opacity: 0.3,
+    side: THREE.DoubleSide
+  });
+  const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+  ring.position.z = 0.1;
+  ring.userData.isGlow = true;
+  group.add(ring);
+  
+  scene.add(group);
+  stacks.set(item.id, group);
+  
+  return group;
+}
+
+function positionConstellations() {
+  if (!STATE.manifest) return;
+  
+  let familyIndex = 0;
+  const familyCount = STATE.manifest.families.length;
+  
+  STATE.manifest.families.forEach((family, fi) => {
+    const familyAngle = (fi / familyCount) * Math.PI * 2;
+    const familyRadius = 15;
+    const familyX = Math.cos(familyAngle) * familyRadius;
+    const familyZ = Math.sin(familyAngle) * familyRadius;
+    
+    family.items.forEach((item, ii) => {
+      const itemAngle = (ii / family.items.length) * Math.PI * 2;
+      const itemRadius = 5;
+      const x = familyX + Math.cos(itemAngle) * itemRadius;
+      const z = familyZ + Math.sin(itemAngle) * itemRadius;
+      const y = (Math.random() - 0.5) * 3;
+      
+      createStack(item, new THREE.Vector3(x, y, z));
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEXTURE LOADING
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadStackTextures(stackGroup) {
+  const item = stackGroup.userData.item;
+  const slides = stackGroup.userData.slides;
+  
+  for (let i = 0; i < slides.length && i < item.slides; i++) {
+    const slideNum = i + 1;
+    const path = `${item.path}/${slideNum}.png`;
+    const textureKey = `${item.id}-${slideNum}`;
+    
+    if (loadedTextures.has(textureKey)) {
+      slides[i].material.map = loadedTextures.get(textureKey);
+      slides[i].material.color.setHex(0xffffff);
+      slides[i].material.needsUpdate = true;
+      continue;
+    }
+    
+    try {
+      const texture = await new Promise((resolve, reject) => {
+        textureLoader.load(path, resolve, undefined, reject);
+      });
+      texture.colorSpace = THREE.SRGBColorSpace;
+      loadedTextures.set(textureKey, texture);
+      slides[i].material.map = texture;
+      slides[i].material.color.setHex(0xffffff);
+      slides[i].material.needsUpdate = true;
+    } catch (e) {
+      // Keep placeholder color
+    }
+  }
+}
+
+function disposeStackTextures(stackGroup) {
+  const item = stackGroup.userData.item;
+  const slides = stackGroup.userData.slides;
+  
+  slides.forEach((slide, i) => {
+    const textureKey = `${item.id}-${i + 1}`;
+    const texture = loadedTextures.get(textureKey);
+    if (texture) {
+      texture.dispose();
+      loadedTextures.delete(textureKey);
+      slide.material.map = null;
+      slide.material.color.setHex(0x00ffff);
+      slide.material.needsUpdate = true;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VIEW MODES
+// ═══════════════════════════════════════════════════════════════════════════
+function setViewMode(mode) {
+  STATE.viewMode = mode;
+  document.getElementById('mode-indicator').textContent = mode.toUpperCase();
+  
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  
+  const stackInfo = document.getElementById('stack-info');
+  const trajectoryOverlay = document.getElementById('trajectory-overlay');
+  const dualRig = document.getElementById('dual-rig');
+  
+  stackInfo.classList.remove('visible');
+  trajectoryOverlay.classList.remove('visible');
+  dualRig.classList.remove('active');
+  
+  switch (mode) {
+    case 'constellation':
+      camera.position.set(0, 15, 40);
+      controls.target.set(0, 0, 0);
+      controls.update();
+      if (STATE.currentStack) disposeStackTextures(STATE.currentStack);
+      STATE.currentStack = null;
+      break;
+      
+    case 'stack':
+      if (STATE.currentStack) {
+        stackInfo.classList.add('visible');
+        updateStackInfo();
+      }
+      break;
+      
+    case 'dual':
+      dualRig.classList.add('active');
+      break;
+      
+    case 'trajectory':
+      trajectoryOverlay.classList.add('visible');
+      updateTrajectoryList();
+      break;
+  }
+}
+
+function focusStack(stackGroup) {
+  STATE.currentStack = stackGroup;
+  STATE.currentSlide = 0;
+  
+  const pos = stackGroup.position;
+  
+  // Animate camera to stack
+  const targetPos = new THREE.Vector3(pos.x, pos.y + 1, pos.z + 8);
+  animateCameraTo(targetPos, pos);
+  
+  loadStackTextures(stackGroup);
+  setViewMode('stack');
+}
+
+function animateCameraTo(targetPosition, targetLookAt) {
+  const startPos = camera.position.clone();
+  const startTarget = controls.target.clone();
+  const duration = 1000;
+  const startTime = Date.now();
+  
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    
+    camera.position.lerpVectors(startPos, targetPosition, eased);
+    controls.target.lerpVectors(startTarget, targetLookAt, eased);
+    controls.update();
+    
+    if (t < 1) requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STACK GRAMMARS
+// ═══════════════════════════════════════════════════════════════════════════
+function setGrammar(grammar) {
+  STATE.grammar = grammar;
+  document.querySelectorAll('.grammar-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.grammar === grammar);
+  });
+  
+  if (STATE.currentStack) {
+    applyGrammar(STATE.currentStack, grammar);
+  }
+}
+
+function applyGrammar(stackGroup, grammar) {
+  const slides = stackGroup.userData.slides;
+  
+  switch (grammar) {
+    case 'deck':
+      slides.forEach((slide, i) => {
+        slide.position.z = -i * 0.3;
+        slide.material.opacity = i === STATE.currentSlide ? 0.95 : 0.3;
+        slide.scale.set(1, 1, 1);
+      });
+      break;
+      
+    case 'strata':
+      slides.forEach((slide, i) => {
+        const distance = Math.abs(i - STATE.currentSlide);
+        slide.position.z = -i * 0.8;
+        slide.material.opacity = Math.max(0.1, 0.9 - distance * 0.15);
+        slide.scale.set(1, 1, 1);
+      });
+      break;
+      
+    case 'burst':
+      const center = slides.length / 2;
+      slides.forEach((slide, i) => {
+        const angle = ((i - center) / slides.length) * Math.PI;
+        const radius = 3;
+        slide.position.z = Math.cos(angle) * radius;
+        slide.position.x = Math.sin(angle) * radius;
+        slide.material.opacity = 0.7;
+        slide.rotation.y = -angle * 0.5;
+        slide.scale.set(0.8, 0.8, 1);
+      });
+      break;
+  }
+}
+
+function navigateSlide(direction) {
+  if (!STATE.currentStack) return;
+  
+  const item = STATE.currentStack.userData.item;
+  STATE.currentSlide = Math.max(0, Math.min(item.slides - 1, STATE.currentSlide + direction));
+  
+  updateStackInfo();
+  applyGrammar(STATE.currentStack, STATE.grammar);
+}
+
+function updateStackInfo() {
+  if (!STATE.currentStack) return;
+  
+  const item = STATE.currentStack.userData.item;
+  document.getElementById('stack-title').textContent = item.title;
+  document.getElementById('stack-meta').textContent = `${item.slides} slides • ${item.date}`;
+  document.getElementById('slide-counter').textContent = `${STATE.currentSlide + 1} / ${item.slides}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDIO ENGINE
+// ═══════════════════════════════════════════════════════════════════════════
+let audioContext, analyser, oscillator, gainNode;
+let audioData = new Uint8Array(128);
+
+function initAudio() {
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 256;
+  
+  gainNode = audioContext.createGain();
+  gainNode.gain.value = 0.3;
+  
+  // Create ambient drone oscillator
+  oscillator = audioContext.createOscillator();
+  oscillator.type = 'sine';
+  oscillator.frequency.value = 60;
+  
+  const lfo = audioContext.createOscillator();
+  lfo.frequency.value = 0.1;
+  const lfoGain = audioContext.createGain();
+  lfoGain.gain.value = 10;
+  lfo.connect(lfoGain);
+  lfoGain.connect(oscillator.frequency);
+  lfo.start();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(analyser);
+  analyser.connect(audioContext.destination);
+  
+  audioData = new Uint8Array(analyser.frequencyBinCount);
+}
+
+function toggleRadio() {
+  if (!audioContext) initAudio();
+  
+  if (STATE.isPlaying) {
+    oscillator.stop();
+    STATE.isPlaying = false;
+    document.getElementById('radio-play').textContent = '▶';
+    document.getElementById('radio-play').classList.remove('playing');
+  } else {
+    oscillator = audioContext.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 60 + Math.random() * 20;
+    oscillator.connect(gainNode);
+    oscillator.start();
+    STATE.isPlaying = true;
+    document.getElementById('radio-play').textContent = '⏸';
+    document.getElementById('radio-play').classList.add('playing');
+  }
+}
+
+function setVolume(value) {
+  if (gainNode) {
+    gainNode.gain.value = value / 100 * 0.5;
+  }
+}
+
+function getAudioLevels() {
+  if (!analyser) return { low: 0, mid: 0, high: 0 };
+  
+  analyser.getByteFrequencyData(audioData);
+  
+  const third = Math.floor(audioData.length / 3);
+  let low = 0, mid = 0, high = 0;
+  
+  for (let i = 0; i < third; i++) low += audioData[i];
+  for (let i = third; i < third * 2; i++) mid += audioData[i];
+  for (let i = third * 2; i < audioData.length; i++) high += audioData[i];
+  
+  return {
+    low: low / third / 255,
+    mid: mid / third / 255,
+    high: high / third / 255
+  };
+}
+
+function drawWaveform() {
+  const canvas = document.getElementById('waveform-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (!analyser) return;
+  
+  analyser.getByteFrequencyData(audioData);
+  
+  const barWidth = canvas.width / audioData.length;
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  gradient.addColorStop(0, '#ff00ff');
+  gradient.addColorStop(0.5, '#00ffff');
+  gradient.addColorStop(1, '#ffcc00');
+  
+  ctx.fillStyle = gradient;
+  
+  for (let i = 0; i < audioData.length; i++) {
+    const height = (audioData[i] / 255) * canvas.height;
+    ctx.fillRect(i * barWidth, canvas.height - height, barWidth - 1, height);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RADIO CURSOR
+// ═══════════════════════════════════════════════════════════════════════════
+let cursorPosition = 0;
+
+function updateRadioCursor() {
+  const cursor = document.getElementById('radio-cursor');
+  
+  if (STATE.isPlaying && STATE.viewMode === 'constellation') {
+    cursor.classList.add('active');
+    cursorPosition += 0.5;
+    if (cursorPosition > window.innerWidth) cursorPosition = 0;
+    cursor.style.left = cursorPosition + 'px';
+  } else {
+    cursor.classList.remove('active');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TRAJECTORY SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+function updateTrajectoryList() {
+  const list = document.getElementById('trajectory-list');
+  list.innerHTML = '';
+  
+  // Auto-generate from highlights or use all stacks
+  const targets = STATE.highlights.length > 0 
+    ? STATE.highlights.map(id => stacks.get(id)).filter(Boolean)
+    : Array.from(stacks.values());
+  
+  STATE.currentTrajectory = targets;
+  
+  targets.forEach((stack, i) => {
+    const item = stack.userData.item;
+    const div = document.createElement('div');
+    div.className = 'trajectory-item' + (i === STATE.trajectoryIndex ? ' current' : '');
+    div.textContent = `${i + 1}. ${item.title.substring(0, 20)}`;
+    list.appendChild(div);
+  });
+}
+
+function playTrajectory() {
+  if (!STATE.currentTrajectory || STATE.currentTrajectory.length === 0) return;
+  
+  const stack = STATE.currentTrajectory[STATE.trajectoryIndex];
+  focusStack(stack);
+  
+  // Auto-advance after delay
+  setTimeout(() => {
+    STATE.trajectoryIndex = (STATE.trajectoryIndex + 1) % STATE.currentTrajectory.length;
+    if (STATE.viewMode === 'trajectory') {
+      setViewMode('constellation');
+      setTimeout(() => playTrajectory(), 1000);
+    }
+  }, 5000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANIMATION LOOP
+// ═══════════════════════════════════════════════════════════════════════════
+function animate() {
+  animationFrame = requestAnimationFrame(animate);
+  
+  const time = Date.now() * 0.001;
+  const audio = getAudioLevels();
+  
+  // Audio-driven modulation
+  stacks.forEach((stack) => {
+    // Glow intensity from bass
+    stack.children.forEach(child => {
+      if (child.userData.isGlow) {
+        child.material.opacity = 0.2 + audio.low * 0.5;
+      }
+    });
+    
+    // Subtle drift from mids
+    stack.position.y += Math.sin(time + stack.position.x) * 0.001 * (1 + audio.mid);
+    stack.rotation.y = Math.sin(time * 0.5 + stack.position.z) * 0.02;
+  });
+  
+  // Camera breathing from mids
+  if (STATE.viewMode === 'constellation') {
+    camera.position.y += Math.sin(time * 0.5) * 0.01 * (1 + audio.mid * 2);
+  }
+  
+  controls.update();
+  renderer.render(scene, camera);
+  
+  updateRadioCursor();
+  drawWaveform();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INPUT HANDLING
+// ═══════════════════════════════════════════════════════════════════════════
+function onCanvasClick(event) {
+  const mouse = new THREE.Vector2(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
+  
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+  
+  const stackGroups = Array.from(stacks.values());
+  const objects = stackGroups.flatMap(g => g.children);
+  const intersects = raycaster.intersectObjects(objects);
+  
+  if (intersects.length > 0) {
+    const clickedGroup = intersects[0].object.parent;
+    if (clickedGroup && stacks.has(clickedGroup.userData?.item?.id)) {
+      focusStack(clickedGroup);
+    }
+  }
+}
+
+function initKeyboard() {
+  document.addEventListener('keydown', (e) => {
+    switch (e.key.toLowerCase()) {
+      case 'c': setViewMode('constellation'); break;
+      case 's': setViewMode('stack'); break;
+      case 'd': setViewMode('dual'); break;
+      case 't': setViewMode('trajectory'); break;
+      case ' ': e.preventDefault(); toggleRadio(); break;
+      case 'r': document.body.classList.toggle('radio-only'); break;
+      case 'f': document.documentElement.requestFullscreen?.(); break;
+      case 'arrowleft': case 'a': navigateSlide(-1); break;
+      case 'arrowright': case 'l': navigateSlide(1); break;
+      case 'arrowup': case 'w': navigateSlide(-1); break;
+      case 'arrowdown': case 's': navigateSlide(1); break;
+      case '1': setGrammar('deck'); break;
+      case '2': setGrammar('strata'); break;
+      case '3': setGrammar('burst'); break;
+      case 'escape':
+        if (STATE.viewMode !== 'constellation') setViewMode('constellation');
+        break;
+      case 'tab':
+        e.preventDefault();
+        document.getElementById('left-rail').classList.toggle('visible');
+        break;
+      case 'enter':
+        if (STATE.viewMode === 'trajectory') playTrajectory();
+        break;
+    }
+  });
+}
+
+function initTouch() {
+  let touchStartX = 0, touchStartY = 0;
+  
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  });
+  
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      navigateSlide(dx > 0 ? -1 : 1);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HUD INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════════════
+function initHUD() {
+  // Family list
+  const familyList = document.getElementById('family-list');
+  STATE.manifest.families.forEach((family, fi) => {
+    const div = document.createElement('div');
+    div.className = 'family-item';
+    div.textContent = family.name;
+    div.addEventListener('click', () => {
+      // Focus first item in family
+      if (family.items.length > 0) {
+        const stack = stacks.get(family.items[0].id);
+        if (stack) focusStack(stack);
+      }
+    });
+    familyList.appendChild(div);
+  });
+  
+  // Mode buttons
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+    btn.addEventListener('click', () => setViewMode(btn.dataset.mode));
+  });
+  
+  // Grammar buttons
+  document.querySelectorAll('.grammar-btn').forEach(btn => {
+    btn.addEventListener('click', () => setGrammar(btn.dataset.grammar));
+  });
+  
+  // Radio controls
+  document.getElementById('radio-play').addEventListener('click', toggleRadio);
+  document.getElementById('volume-slider').addEventListener('input', (e) => setVolume(e.target.value));
+  document.getElementById('radio-only-btn').addEventListener('click', () => {
+    document.body.classList.toggle('radio-only');
+  });
+  
+  // Toggle rail
+  document.getElementById('toggle-rail').addEventListener('click', () => {
+    document.getElementById('left-rail').classList.toggle('visible');
+  });
+  
+  // Search
+  document.getElementById('search-box').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    stacks.forEach((stack, id) => {
+      const item = stack.userData.item;
+      const match = item.title.toLowerCase().includes(query) || 
+                    item.tags?.some(t => t.includes(query));
+      stack.visible = !query || match;
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FALLBACK 2D GRID
+// ═══════════════════════════════════════════════════════════════════════════
+function showFallback() {
+  const grid = document.getElementById('fallback-grid');
+  grid.classList.add('active');
+  
+  STATE.manifest.families.forEach(family => {
+    const section = document.createElement('div');
+    section.className = 'fallback-family';
+    section.innerHTML = `<h2>${family.name}</h2><div class="fallback-items"></div>`;
+    
+    const items = section.querySelector('.fallback-items');
+    family.items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'fallback-item';
+      card.innerHTML = `
+        <img src="${item.path}/1.png" alt="${item.title}" onerror="this.style.display='none'">
+        <div class="fallback-item-title">${item.title}</div>
+      `;
+      items.appendChild(card);
+    });
+    
+    grid.appendChild(section);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════════════
+async function init() {
+  // Try to load manifest
+  try {
+    const response = await fetch('media-manifest.json');
+    if (response.ok) {
+      STATE.manifest = await response.json();
+    } else {
+      STATE.manifest = DEMO_MANIFEST;
+    }
+  } catch {
+    STATE.manifest = DEMO_MANIFEST;
+  }
+  
+  // Check WebGL support
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  
+  if (!gl) {
+    showFallback();
+    document.getElementById('loading').classList.add('hidden');
+    return;
+  }
+  
+  // Initialize 3D scene
+  try {
+    initScene();
+    positionConstellations();
+    initHUD();
+    initKeyboard();
+    initTouch();
+    
+    // Start animation
+    animate();
+    
+    // Hide loading
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hidden');
+    }, 1500);
+    
+  } catch (e) {
+    console.error('3D initialization failed:', e);
+    showFallback();
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

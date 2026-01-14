@@ -1,0 +1,322 @@
+{
+  "id": "0003",
+  "title": "Work Stream 2: The Techs (Pipeline Team)",
+  "sourceImage": "../../pages/0003.png",
+  "canvasSize": [
+    1920,
+    1080
+  ],
+  "camera": {
+    "type": "perspective",
+    "fov": 45,
+    "position": [
+      0,
+      0,
+      230.39999999999998
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ],
+    "near": 1,
+    "far": 5000
+  },
+  "environment": {
+    "background": "#050505",
+    "fog": {
+      "enabled": true,
+      "near": 115.19999999999999,
+      "far": 691.1999999999999
+    },
+    "post": {
+      "bloom": true,
+      "vignette": true,
+      "filmGrain": 0.08
+    }
+  },
+  "lights": [
+    {
+      "type": "hemisphere",
+      "intensity": 0.55
+    },
+    {
+      "type": "directional",
+      "position": [
+        500,
+        900,
+        400
+      ],
+      "intensity": 1.1,
+      "shadows": true
+    },
+    {
+      "type": "point",
+      "position": [
+        -350,
+        200,
+        500
+      ],
+      "intensity": 0.45
+    }
+  ],
+  "assets": {
+    "textures": [
+      {
+        "id": "page",
+        "src": "../../pages/0003.png"
+      }
+    ],
+    "ldraw": []
+  },
+  "entities": [
+    {
+      "id": "bg",
+      "type": "plane",
+      "texture": "page",
+      "size": [
+        192.0,
+        108.0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": false,
+        "opacity": 1,
+        "emissive": 0.04
+      }
+    },
+    {
+      "id": "cut-01",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.08333333333333333,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        -64.0,
+        36.0,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.15
+      }
+    },
+    {
+      "id": "cut-02",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.4166666666666667,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        0.0,
+        36.0,
+        51.42857142857143
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.13999999999999999
+      }
+    },
+    {
+      "id": "cut-03",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.75,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        64.0,
+        36.0,
+        82.85714285714286
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.13
+      }
+    }
+  ],
+  "navigation": {
+    "snapPoints": [
+      {
+        "name": "front",
+        "cameraPos": [
+          0,
+          0,
+          230.39999999999998
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "oblique",
+        "cameraPos": [
+          115.19999999999999,
+          69.11999999999999,
+          184.32
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "tour": [
+      {
+        "focusEntity": "cut-01",
+        "seconds": 2.5
+      },
+      {
+        "focusEntity": "cut-02",
+        "seconds": 2.5
+      }
+    ]
+  },
+  "motion": {
+    "float": {
+      "enabled": true,
+      "amplitude": 1.6,
+      "speed": 0.25
+    },
+    "drift": {
+      "enabled": true,
+      "strength": 0.35
+    }
+  },
+  "legos": {
+    "title": "The Asset Loop",
+    "description": "From Museum Data to Authentic Bronze LoRA.",
+    "location": "The Latent Foundry",
+    "entities": [
+      {
+        "id": "e_scraper",
+        "type": "tool",
+        "name": "Data Scraper",
+        "source": "Museum Images"
+      },
+      {
+        "id": "e_model",
+        "type": "ai",
+        "name": "Neural Network",
+        "action": "Fine-tuning"
+      },
+      {
+        "id": "e_lora",
+        "type": "artifact",
+        "name": "style_bronze_age.safetensors",
+        "trait": "Hammered"
+      },
+      {
+        "id": "e_test",
+        "type": "event",
+        "name": "The Bronze Phone Test"
+      }
+    ],
+    "goals": [
+      {
+        "id": "g_auth",
+        "name": "Achieve Museum Authenticity",
+        "owner": "e_model"
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "o_plastic",
+        "name": "The Auden Glitch (Steampunk Plastic)",
+        "affects": "e_test"
+      }
+    ],
+    "shifts": [
+      {
+        "id": "s_training",
+        "name": "Embedding Authenticity",
+        "causes": [
+          "e_scraper",
+          "e_model"
+        ],
+        "results_in": "e_lora"
+      }
+    ],
+    "relations": [
+      "[ingests] e_scraper -> e_model",
+      "[produces] e_model -> e_lora",
+      "[validates] e_test -> e_lora"
+    ],
+    "timeline": [
+      {
+        "id": "t_loop",
+        "description": "The Asset Loop",
+        "scenes": [
+          {
+            "id": "sc_scrape",
+            "description": "Collecting 500+ images"
+          },
+          {
+            "id": "sc_train",
+            "description": "Training the LoRA"
+          },
+          {
+            "id": "sc_test",
+            "description": "Validating against the Bronze Phone"
+          }
+        ]
+      }
+    ]
+  }
+}

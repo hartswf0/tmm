@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield Scene Annotator</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --panel: #151515;
+            --accent: #c9a227;
+            --accent2: #00cccc;
+            --text: #e8e4d9;
+            --dim: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+        }
+
+        #sidebar {
+            width: 300px;
+            background: var(--panel);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+        }
+
+        #sidebar h1 {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        #slide-select {
+            width: 100%;
+            padding: 8px;
+            background: #222;
+            border: 1px solid #444;
+            color: var(--text);
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section h3 {
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        #layer-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #333;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .layer-item:hover {
+            border-color: var(--accent);
+        }
+
+        .layer-item.selected {
+            background: rgba(201, 162, 39, 0.1);
+            border-color: var(--accent);
+        }
+
+        .layer-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+        }
+
+        .layer-info {
+            flex: 1;
+            font-size: 10px;
+        }
+
+        .layer-delete {
+            padding: 2px 6px;
+            background: #400;
+            border: none;
+            color: #f66;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        #tools {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tool-btn {
+            flex: 1;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .tool-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        #layer-props {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #333;
+        }
+
+        #layer-props label {
+            display: block;
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 4px;
+        }
+
+        #layer-props select,
+        #layer-props input {
+            width: 100%;
+            padding: 6px;
+            background: #222;
+            border: 1px solid #444;
+            color: var(--text);
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        #export-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            border: none;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            margin-top: 16px;
+        }
+
+        #export-btn:hover {
+            opacity: 0.9;
+        }
+
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #image-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: crosshair;
+        }
+
+        #overlay-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            font-size: 10px;
+            color: var(--dim);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sidebar">
+        <h1>
+            <a href="index.html" style="color:inherit; text-decoration:none; margin-right:8px;"
+                title="Back to Hub">🛡️</a>
+            SCENE ANNOTATOR
+        </h1>
+
+        <select id="slide-select"></select>
+
+        <div id="tools">
+            <button class="tool-btn active" data-tool="rect">RECT</button>
+            <button class="tool-btn" data-tool="select">SELECT</button>
+            <button class="tool-btn" data-tool="move">MOVE</button>
+        </div>
+
+        <div class="section">
+            <h3>LAYERS</h3>
+            <div id="layer-list"></div>
+        </div>
+
+        <div class="section">
+            <h3>CONTEXT (LEGOS)</h3>
+            <div id="legos-context" style="font-size: 10px; color: var(--dim); line-height: 1.4;">
+                <em style="display:block; margin-bottom:4px;">Load a slide to see entities...</em>
+            </div>
+        </div>
+
+        <div id="layer-props">
+            <h3>SELECTED LAYER</h3>
+            <label>Type</label>
+            <select id="prop-type">
+                <option value="title">Title Text</option>
+                <option value="diagram">Diagram</option>
+                <option value="figure">Figure</option>
+                <option value="icon">Icon</option>
+                <option value="background">Background</option>
+            </select>
+            <label>Depth (Z)</label>
+            <input type="range" id="prop-depth" min="10" max="300" value="100">
+            <label>Emissive</label>
+            <input type="range" id="prop-emissive" min="0" max="30" value="10">
+        </div>
+
+        <button id="export-btn">EXPORT OVERRIDES</button>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="image-canvas"></canvas>
+        <canvas id="overlay-canvas"></canvas>
+        <div id="instructions">Click and drag to draw rectangles. Use properties panel to adjust.</div>
+    </div>
+
+    <script>
+        const STATE = {
+            manifest: null,
+            currentSlide: null,
+            layers: [],
+            selectedLayer: null,
+            tool: 'rect',
+            drawing: false,
+            startX: 0,
+            startY: 0,
+            imageWidth: 0,
+            imageHeight: 0
+        };
+
+        const COLORS = [
+            '#ff6b6b', '#4ecdc4', '#ffe66d', '#95e1d3', '#f38181',
+            '#aa96da', '#fcbad3', '#a8d8ea', '#ffd3b6', '#c7ceea'
+        ];
+
+        async function init() {
+            try {
+                const response = await fetch('manifest.json');
+                STATE.manifest = await response.json();
+            } catch (e) {
+                console.error('No manifest found');
+                return;
+            }
+
+            populateSlideSelect();
+            bindEvents();
+
+            if (STATE.manifest.slides.length > 0) {
+                loadSlide(0);
+            }
+        }
+
+        function populateSlideSelect() {
+            const select = document.getElementById('slide-select');
+            STATE.manifest.slides.forEach((slide, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = slide.title;
+                select.appendChild(opt);
+            });
+        }
+
+        async function loadSlide(index) {
+            const slide = STATE.manifest.slides[index];
+            STATE.currentSlide = slide;
+            STATE.layers = [];
+            STATE.selectedLayer = null;
+
+            // Load existing scene.json cutouts
+            try {
+                const response = await fetch(slide.scene);
+                const scene = await response.json();
+
+                scene.entities.forEach((entity, i) => {
+                    if (entity.type === 'cutoutPlane' && entity.rectN) {
+                        const [nx, ny, nw, nh] = entity.rectN;
+                        STATE.layers.push({
+                            id: entity.id,
+                            x: nx,
+                            y: ny,
+                            w: nw,
+                            h: nh,
+                            type: 'diagram',
+                            depth: entity.position[2] || 100,
+                            emissive: (entity.material?.emissive || 0.1) * 100,
+                            color: COLORS[i % COLORS.length]
+                        });
+                    }
+                });
+
+                // Populate LEGOS Context
+                const contextContainer = document.getElementById('legos-context');
+                if (scene.legos && scene.legos.entities) {
+                    contextContainer.innerHTML = scene.legos.entities.map(e =>
+                        `<div style="margin-bottom:4px; padding:4px; border:1px solid #333; border-radius:4px;">
+                            <span style="color:var(--accent)">${e.id}</span>: <span style="color:#fff">${e.name}</span>
+                        </div>`
+                    ).join('');
+                } else {
+                    contextContainer.innerHTML = '<em>No LEGOS data found.</em>';
+                }
+
+            } catch (e) {
+                console.log('No existing scene data');
+            }
+
+            // Load image
+            const img = new Image();
+            img.onload = () => {
+                STATE.imageWidth = img.width;
+                STATE.imageHeight = img.height;
+
+                const container = document.getElementById('canvas-container');
+                const maxW = container.clientWidth - 40;
+                const maxH = container.clientHeight - 40;
+                const scale = Math.min(maxW / img.width, maxH / img.height);
+
+                const canvas = document.getElementById('image-canvas');
+                const overlay = document.getElementById('overlay-canvas');
+
+                canvas.width = overlay.width = img.width * scale;
+                canvas.height = overlay.height = img.height * scale;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                renderLayers();
+            };
+            img.src = slide.page;
+
+            renderLayerList();
+        }
+
+        function renderLayers() {
+            const canvas = document.getElementById('overlay-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            STATE.layers.forEach((layer, i) => {
+                const x = layer.x * canvas.width;
+                const y = layer.y * canvas.height;
+                const w = layer.w * canvas.width;
+                const h = layer.h * canvas.height;
+
+                ctx.strokeStyle = layer.color;
+                ctx.lineWidth = layer === STATE.selectedLayer ? 3 : 1;
+                ctx.strokeRect(x, y, w, h);
+
+                ctx.fillStyle = layer.color + '33';
+                ctx.fillRect(x, y, w, h);
+
+                ctx.fillStyle = layer.color;
+                ctx.font = '10px monospace';
+                ctx.fillText(layer.id, x + 4, y + 12);
+            });
+        }
+
+        function renderLayerList() {
+            const container = document.getElementById('layer-list');
+            container.innerHTML = '';
+
+            STATE.layers.forEach((layer, i) => {
+                const item = document.createElement('div');
+                item.className = 'layer-item' + (layer === STATE.selectedLayer ? ' selected' : '');
+                item.innerHTML = `
+      <div class="layer-color" style="background:${layer.color}"></div>
+      <div class="layer-info">${layer.id} (z:${Math.round(layer.depth)})</div>
+      <button class="layer-delete">×</button>
+    `;
+
+                item.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('layer-delete')) {
+                        selectLayer(layer);
+                    }
+                });
+
+                item.querySelector('.layer-delete').addEventListener('click', () => {
+                    STATE.layers = STATE.layers.filter(l => l !== layer);
+                    if (STATE.selectedLayer === layer) STATE.selectedLayer = null;
+                    renderLayers();
+                    renderLayerList();
+                });
+
+                container.appendChild(item);
+            });
+        }
+
+        function selectLayer(layer) {
+            STATE.selectedLayer = layer;
+            renderLayers();
+            renderLayerList();
+
+            if (layer) {
+                document.getElementById('prop-type').value = layer.type;
+                document.getElementById('prop-depth').value = layer.depth;
+                document.getElementById('prop-emissive').value = layer.emissive;
+            }
+        }
+
+        function bindEvents() {
+            // Slide select
+            document.getElementById('slide-select').addEventListener('change', (e) => {
+                loadSlide(parseInt(e.target.value));
+            });
+
+            // Tools
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    STATE.tool = btn.dataset.tool;
+                });
+            });
+
+            // Canvas events
+            const canvas = document.getElementById('image-canvas');
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (STATE.tool === 'rect') {
+                    STATE.drawing = true;
+                    const rect = canvas.getBoundingClientRect();
+                    STATE.startX = (e.clientX - rect.left) / canvas.width;
+                    STATE.startY = (e.clientY - rect.top) / canvas.height;
+                } else if (STATE.tool === 'select') {
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = (e.clientX - rect.left) / canvas.width;
+                    const my = (e.clientY - rect.top) / canvas.height;
+
+                    const found = [...STATE.layers].reverse().find(layer => {
+                        return mx >= layer.x && mx <= layer.x + layer.w &&
+                            my >= layer.y && my <= layer.y + layer.h;
+                    });
+                    selectLayer(found || null);
+                }
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!STATE.drawing) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const overlay = document.getElementById('overlay-canvas');
+                const ctx = overlay.getContext('2d');
+
+                const endX = (e.clientX - rect.left) / canvas.width;
+                const endY = (e.clientY - rect.top) / canvas.height;
+
+                renderLayers();
+
+                // Draw preview
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(
+                    STATE.startX * overlay.width,
+                    STATE.startY * overlay.height,
+                    (endX - STATE.startX) * overlay.width,
+                    (endY - STATE.startY) * overlay.height
+                );
+                ctx.setLineDash([]);
+            });
+
+            canvas.addEventListener('mouseup', (e) => {
+                if (!STATE.drawing) return;
+                STATE.drawing = false;
+
+                const rect = canvas.getBoundingClientRect();
+                const endX = (e.clientX - rect.left) / canvas.width;
+                const endY = (e.clientY - rect.top) / canvas.height;
+
+                const x = Math.min(STATE.startX, endX);
+                const y = Math.min(STATE.startY, endY);
+                const w = Math.abs(endX - STATE.startX);
+                const h = Math.abs(endY - STATE.startY);
+
+                if (w > 0.02 && h > 0.02) {
+                    const layer = {
+                        id: `cut-${String(STATE.layers.length + 1).padStart(2, '0')}`,
+                        x, y, w, h,
+                        type: 'diagram',
+                        depth: 100,
+                        emissive: 10,
+                        color: COLORS[STATE.layers.length % COLORS.length]
+                    };
+                    STATE.layers.push(layer);
+                    selectLayer(layer);
+                    renderLayers();
+                    renderLayerList();
+                }
+            });
+
+            // Properties
+            document.getElementById('prop-type').addEventListener('change', (e) => {
+                if (STATE.selectedLayer) {
+                    STATE.selectedLayer.type = e.target.value;
+                }
+            });
+
+            document.getElementById('prop-depth').addEventListener('input', (e) => {
+                if (STATE.selectedLayer) {
+                    STATE.selectedLayer.depth = parseFloat(e.target.value);
+                    renderLayerList();
+                }
+            });
+
+            document.getElementById('prop-emissive').addEventListener('input', (e) => {
+                if (STATE.selectedLayer) {
+                    STATE.selectedLayer.emissive = parseFloat(e.target.value);
+                }
+            });
+
+            // Export
+            document.getElementById('export-btn').addEventListener('click', exportOverrides);
+        }
+
+        function exportOverrides() {
+            if (!STATE.currentSlide) return;
+
+            const overrides = {
+                slideId: STATE.currentSlide.id,
+                cutouts: STATE.layers.map(layer => ({
+                    id: layer.id,
+                    rectN: [layer.x, layer.y, layer.w, layer.h],
+                    type: layer.type,
+                    depth: layer.depth,
+                    emissive: layer.emissive / 100
+                }))
+            };
+
+            const json = JSON.stringify(overrides, null, 2);
+
+            // Download
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `overrides-${STATE.currentSlide.id}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log('Exported:', overrides);
+            alert('Overrides exported! Place in scenes/<id>/ folder and re-run build with --merge flag.');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

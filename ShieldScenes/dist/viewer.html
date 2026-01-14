@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield Scene Forge - Diorama Viewer</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: rgba(20, 25, 30, 0.95);
+            --accent: #c9a227;
+            --accent2: #00cccc;
+            --text: #e8e4d9;
+            --dim: #666;
+            --glow: 0 0 20px rgba(201, 162, 39, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #app {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Left Panel */
+        #left-panel {
+            width: 280px;
+            background: var(--panel);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        #logo {
+            padding: 16px;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--accent);
+            border-bottom: 1px solid #333;
+            text-align: center;
+        }
+
+        #search {
+            margin: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        #search::placeholder {
+            color: var(--dim);
+        }
+
+        #tags {
+            padding: 0 12px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            padding: 3px 8px;
+            font-size: 9px;
+            background: rgba(201, 162, 39, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag:hover,
+        .tag.active {
+            background: rgba(201, 162, 39, 0.3);
+        }
+
+        #slide-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .slide-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .slide-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #444;
+        }
+
+        .slide-item.active {
+            background: rgba(201, 162, 39, 0.1);
+            border-color: var(--accent);
+        }
+
+        .slide-thumb {
+            width: 60px;
+            height: 40px;
+            background: #222;
+            object-fit: cover;
+        }
+
+        .slide-info {
+            flex: 1;
+        }
+
+        .slide-title {
+            font-size: 10px;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .slide-meta {
+            font-size: 9px;
+            color: var(--dim);
+        }
+
+        #playlist-section {
+            border-top: 1px solid #333;
+            padding: 12px;
+        }
+
+        #playlist-section h4 {
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        #playlist-items {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .playlist-item {
+            font-size: 10px;
+            padding: 4px 0;
+            color: var(--accent2);
+        }
+
+        /* Main Viewport */
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #viewport {
+            flex: 1;
+            position: relative;
+        }
+
+        #viewport canvas {
+            display: block;
+        }
+
+        #compare-viewport {
+            display: none;
+            flex: 1;
+            position: relative;
+            border-left: 2px solid var(--accent);
+        }
+
+        #compare-viewport.active {
+            display: block;
+        }
+
+        /* Top Bar */
+        #top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, var(--panel) 0%, transparent 100%);
+            z-index: 5;
+        }
+
+        #mode-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mode-tab {
+            padding: 6px 16px;
+            font-size: 10px;
+            letter-spacing: 2px;
+            background: transparent;
+            border: 1px solid #444;
+            color: var(--dim);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-tab:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mode-tab.active {
+            background: rgba(201, 162, 39, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        #scene-title {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--accent);
+        }
+
+        /* Bottom Controls */
+        #bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(0deg, var(--panel) 0%, transparent 100%);
+            z-index: 5;
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            color: var(--text);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctrl-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: var(--glow);
+        }
+
+        .ctrl-btn.active {
+            background: rgba(201, 162, 39, 0.2);
+            border-color: var(--accent);
+        }
+
+        #slide-counter {
+            font-size: 12px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        #snap-points {
+            display: flex;
+            gap: 6px;
+        }
+
+        .snap-btn {
+            padding: 4px 10px;
+            font-size: 9px;
+            background: transparent;
+            border: 1px solid #444;
+            color: var(--dim);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .snap-btn:hover,
+        .snap-btn.active {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        /* Grid Mode */
+        #grid-view {
+            display: none;
+            position: absolute;
+            inset: 60px 0 60px 0;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg);
+            z-index: 4;
+        }
+
+        #grid-view.active {
+            display: block;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .grid-item {
+            aspect-ratio: 16/9;
+            background: var(--panel);
+            border: 1px solid #333;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .grid-item:hover {
+            border-color: var(--accent);
+            transform: scale(1.02);
+            box-shadow: var(--glow);
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.85;
+        }
+
+        .grid-item-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px;
+            background: linear-gradient(transparent, var(--bg));
+            font-size: 10px;
+        }
+
+        /* Loading */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        #loading.hidden {
+            display: none;
+        }
+
+        #loading-text {
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--accent);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Tour overlay */
+        #tour-overlay {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: var(--panel);
+            border: 1px solid var(--accent);
+            padding: 12px;
+            z-index: 6;
+        }
+
+        #tour-overlay.active {
+            display: block;
+        }
+
+        #tour-overlay h4 {
+            font-size: 10px;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        #tour-progress {
+            font-size: 11px;
+            color: var(--text);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loading">
+        <div id="loading-text">INITIALIZING SHIELD SCENES</div>
+    </div>
+
+    <div id="app">
+        <div id="left-panel">
+            <div id="logo">
+                <a href="index.html" style="color:var(--accent); text-decoration:none;">🛡️ SHIELD SCENE FORGE</a>
+            </div>
+            <input type="text" id="search" placeholder="Search slides...">
+            <div id="tags"></div>
+            <div id="slide-list"></div>
+            <div id="playlist-section">
+                <h4>TRAJECTORY</h4>
+                <div id="playlist-items"></div>
+            </div>
+        </div>
+
+        <div id="main">
+            <div id="top-bar">
+                <div id="mode-tabs">
+                    <button class="mode-tab" data-mode="grid">GRID</button>
+                    <button class="mode-tab active" data-mode="stack">STACK</button>
+                    <button class="mode-tab" data-mode="compare">COMPARE</button>
+                    <button class="mode-tab" data-mode="trajectory">TRAJECTORY</button>
+                </div>
+                <div id="scene-title">Select a slide</div>
+            </div>
+
+            <div id="viewport"></div>
+            <div id="compare-viewport"></div>
+            <div id="grid-view"></div>
+
+            <div id="bottom-bar">
+                <button class="ctrl-btn" id="btn-prev" title="Previous">◀</button>
+                <button class="ctrl-btn" id="btn-tour" title="Auto Tour">▶</button>
+                <button class="ctrl-btn" id="btn-next" title="Next">▶</button>
+                <div id="slide-counter">0 / 0</div>
+                <div id="snap-points"></div>
+                <button class="ctrl-btn" id="btn-screenshot" title="Screenshot">📷</button>
+                <button class="ctrl-btn" id="btn-fullscreen" title="Fullscreen">⛶</button>
+            </div>
+
+            <div id="tour-overlay">
+                <h4>AUTO TOUR</h4>
+                <div id="tour-progress">Focusing: ...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════════════════
+        const STATE = {
+            manifest: null,
+            currentIndex: 0,
+            compareIndex: 1,
+            mode: 'stack',
+            tourActive: false,
+            tourStep: 0,
+            playlist: [],
+            filter: '',
+            activeTag: null
+        };
+
+        let scene, camera, renderer, controls;
+        let compareScene, compareCamera, compareRenderer, compareControls;
+        let currentSceneData = null;
+        let loadedTextures = new Map();
+        let entities = [];
+        let animationId;
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════════════
+        async function init() {
+            try {
+                const response = await fetch('manifest.json');
+                STATE.manifest = await response.json();
+            } catch (e) {
+                console.error('Failed to load manifest:', e);
+                document.getElementById('loading-text').textContent = 'Failed to load manifest.json';
+                return;
+            }
+
+            initThree();
+            renderSlideList();
+            renderTags();
+            bindEvents();
+
+            if (STATE.manifest.slides.length > 0) {
+                loadSlide(0);
+            }
+
+            document.getElementById('loading').classList.add('hidden');
+            animate();
+        }
+
+        function initThree() {
+            const viewport = document.getElementById('viewport');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050505);
+            scene.fog = new THREE.FogExp2(0x050505, 0.003);
+
+            camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 1, 5000);
+            camera.position.set(0, 0, 200);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            viewport.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            const ambient = new THREE.HemisphereLight(0xffffff, 0x444444, 0.55);
+            scene.add(ambient);
+
+            const directional = new THREE.DirectionalLight(0xffffff, 1.1);
+            directional.position.set(500, 900, 400);
+            scene.add(directional);
+
+            const point = new THREE.PointLight(0xffcc77, 0.45, 1000);
+            point.position.set(-350, 200, 500);
+            scene.add(point);
+
+            window.addEventListener('resize', onResize);
+        }
+
+        function onResize() {
+            const viewport = document.getElementById('viewport');
+            camera.aspect = viewport.clientWidth / viewport.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // SCENE LOADING
+        // ═══════════════════════════════════════════════════════════════════════════
+        async function loadSlide(index) {
+            if (!STATE.manifest || index < 0 || index >= STATE.manifest.slides.length) return;
+
+            STATE.currentIndex = index;
+            const slide = STATE.manifest.slides[index];
+
+            document.getElementById('scene-title').textContent = slide.title;
+            document.getElementById('slide-counter').textContent = `${index + 1} / ${STATE.manifest.slides.length}`;
+
+            // Update active state in list
+            document.querySelectorAll('.slide-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+
+            // Load scene data
+            try {
+                const response = await fetch(slide.scene);
+                currentSceneData = await response.json();
+                await renderScene(currentSceneData);
+                renderSnapPoints(currentSceneData);
+            } catch (e) {
+                console.error('Failed to load scene:', e);
+            }
+        }
+
+        async function renderScene(sceneData) {
+            // Clear existing entities
+            entities.forEach(e => {
+                scene.remove(e);
+                if (e.geometry) e.geometry.dispose();
+                if (e.material) {
+                    if (e.material.map) e.material.map.dispose();
+                    e.material.dispose();
+                }
+            });
+            entities = [];
+
+            // Update fog
+            if (sceneData.environment?.fog?.enabled) {
+                scene.fog = new THREE.FogExp2(0x050505, 1 / sceneData.environment.fog.far);
+            }
+
+            const textureLoader = new THREE.TextureLoader();
+
+            // Load page texture
+            const pageTexture = await new Promise((resolve, reject) => {
+                textureLoader.load(sceneData.sourceImage, resolve, undefined, reject);
+            });
+            pageTexture.colorSpace = THREE.SRGBColorSpace;
+
+            // Create entities
+            for (const entityData of sceneData.entities) {
+                let mesh;
+
+                if (entityData.type === 'plane') {
+                    const [w, h] = entityData.size;
+                    const geometry = new THREE.PlaneGeometry(w, h);
+                    const material = new THREE.MeshStandardMaterial({
+                        map: pageTexture,
+                        transparent: entityData.material.transparent,
+                        opacity: entityData.material.opacity,
+                        emissive: new THREE.Color(0xffffff),
+                        emissiveIntensity: entityData.material.emissive,
+                        side: THREE.DoubleSide
+                    });
+                    mesh = new THREE.Mesh(geometry, material);
+
+                } else if (entityData.type === 'cutoutPlane') {
+                    const [nx, ny, nw, nh] = entityData.rectN;
+                    const [w, h] = entityData.size;
+
+                    // Create cutout texture via canvas
+                    const cutoutTexture = createCutoutTexture(pageTexture.image, nx, ny, nw, nh);
+
+                    const geometry = new THREE.PlaneGeometry(w, h);
+                    const material = new THREE.MeshStandardMaterial({
+                        map: cutoutTexture,
+                        transparent: true,
+                        opacity: entityData.material.opacity,
+                        emissive: new THREE.Color(0xffffff),
+                        emissiveIntensity: entityData.material.emissive,
+                        side: THREE.DoubleSide,
+                        alphaTest: 0.1
+                    });
+                    mesh = new THREE.Mesh(geometry, material);
+                }
+
+                if (mesh) {
+                    mesh.position.set(...entityData.position);
+                    if (entityData.rotation) {
+                        mesh.rotation.set(...entityData.rotation);
+                    }
+                    mesh.userData = entityData;
+                    scene.add(mesh);
+                    entities.push(mesh);
+                }
+            }
+
+            // Set camera
+            if (sceneData.camera) {
+                camera.position.set(...sceneData.camera.position);
+                controls.target.set(...sceneData.camera.target);
+                controls.update();
+            }
+        }
+
+        function createCutoutTexture(image, nx, ny, nw, nh) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const sx = nx * image.width;
+            const sy = ny * image.height;
+            const sw = nw * image.width;
+            const sh = nh * image.height;
+
+            canvas.width = sw;
+            canvas.height = sh;
+
+            ctx.drawImage(image, sx, sy, sw, sh, 0, 0, sw, sh);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            return texture;
+        }
+
+        function renderSnapPoints(sceneData) {
+            const container = document.getElementById('snap-points');
+            container.innerHTML = '';
+
+            if (!sceneData.navigation?.snapPoints) return;
+
+            sceneData.navigation.snapPoints.forEach((snap, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'snap-btn';
+                btn.textContent = snap.name.toUpperCase();
+                btn.addEventListener('click', () => snapToPoint(snap));
+                container.appendChild(btn);
+            });
+        }
+
+        function snapToPoint(snap) {
+            const startPos = camera.position.clone();
+            const startTarget = controls.target.clone();
+            const endPos = new THREE.Vector3(...snap.cameraPos);
+            const endTarget = new THREE.Vector3(...snap.target);
+
+            const duration = 800;
+            const startTime = Date.now();
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const t = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - t, 3);
+
+                camera.position.lerpVectors(startPos, endPos, eased);
+                controls.target.lerpVectors(startTarget, endTarget, eased);
+                controls.update();
+
+                if (t < 1) requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // UI RENDERING
+        // ═══════════════════════════════════════════════════════════════════════════
+        function renderSlideList() {
+            const container = document.getElementById('slide-list');
+            container.innerHTML = '';
+
+            const slides = getFilteredSlides();
+
+            slides.forEach((slide, displayIndex) => {
+                const originalIndex = STATE.manifest.slides.indexOf(slide);
+
+                const item = document.createElement('div');
+                item.className = 'slide-item' + (originalIndex === STATE.currentIndex ? ' active' : '');
+                item.innerHTML = `
+      <img class="slide-thumb" src="${slide.page}" alt="">
+      <div class="slide-info">
+        <div class="slide-title">${slide.title}</div>
+        <div class="slide-meta">${slide.cutouts} layers • ${slide.tags.join(', ')}</div>
+      </div>
+    `;
+                item.addEventListener('click', () => loadSlide(originalIndex));
+                container.appendChild(item);
+            });
+        }
+
+        function renderTags() {
+            const container = document.getElementById('tags');
+            container.innerHTML = '';
+
+            const allTags = new Set();
+            STATE.manifest.slides.forEach(s => s.tags.forEach(t => allTags.add(t)));
+
+            allTags.forEach(tag => {
+                const el = document.createElement('div');
+                el.className = 'tag' + (STATE.activeTag === tag ? ' active' : '');
+                el.textContent = tag;
+                el.addEventListener('click', () => {
+                    STATE.activeTag = STATE.activeTag === tag ? null : tag;
+                    renderTags();
+                    renderSlideList();
+                });
+                container.appendChild(el);
+            });
+        }
+
+        function getFilteredSlides() {
+            return STATE.manifest.slides.filter(slide => {
+                if (STATE.filter && !slide.title.toLowerCase().includes(STATE.filter.toLowerCase())) {
+                    return false;
+                }
+                if (STATE.activeTag && !slide.tags.includes(STATE.activeTag)) {
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        function renderGridView() {
+            const container = document.getElementById('grid-view');
+            container.innerHTML = '<div class="grid-container"></div>';
+            const grid = container.querySelector('.grid-container');
+
+            const slides = getFilteredSlides();
+
+            slides.forEach((slide, i) => {
+                const originalIndex = STATE.manifest.slides.indexOf(slide);
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.innerHTML = `
+      <img src="${slide.page}" alt="">
+      <div class="grid-item-title">${slide.title}</div>
+    `;
+                item.addEventListener('click', () => {
+                    setMode('stack');
+                    loadSlide(originalIndex);
+                });
+                grid.appendChild(item);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // MODES
+        // ═══════════════════════════════════════════════════════════════════════════
+        function setMode(mode) {
+            STATE.mode = mode;
+
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+
+            document.getElementById('grid-view').classList.toggle('active', mode === 'grid');
+            document.getElementById('compare-viewport').classList.toggle('active', mode === 'compare');
+            document.getElementById('tour-overlay').classList.toggle('active', mode === 'trajectory');
+
+            if (mode === 'grid') {
+                renderGridView();
+            } else if (mode === 'compare') {
+                initCompareView();
+            } else if (mode === 'trajectory') {
+                startTrajectory();
+            }
+        }
+
+        function initCompareView() {
+            if (compareRenderer) return;
+
+            const viewport = document.getElementById('compare-viewport');
+
+            compareScene = new THREE.Scene();
+            compareScene.background = new THREE.Color(0x050505);
+
+            compareCamera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 1, 5000);
+            compareCamera.position.set(0, 0, 200);
+
+            compareRenderer = new THREE.WebGLRenderer({ antialias: true });
+            compareRenderer.setSize(viewport.clientWidth, viewport.clientHeight);
+            viewport.appendChild(compareRenderer.domElement);
+
+            compareControls = new OrbitControls(compareCamera, compareRenderer.domElement);
+            compareControls.enableDamping = true;
+
+            // Load next slide into compare view
+            if (STATE.manifest.slides.length > 1) {
+                STATE.compareIndex = (STATE.currentIndex + 1) % STATE.manifest.slides.length;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // TRAJECTORY / AUTO-TOUR
+        // ═══════════════════════════════════════════════════════════════════════════
+        function startTrajectory() {
+            if (!currentSceneData?.navigation?.tour) return;
+
+            STATE.tourActive = true;
+            STATE.tourStep = 0;
+            runTourStep();
+        }
+
+        function runTourStep() {
+            if (!STATE.tourActive || !currentSceneData?.navigation?.tour) return;
+
+            const tour = currentSceneData.navigation.tour;
+            if (STATE.tourStep >= tour.length) {
+                // Move to next slide
+                if (STATE.currentIndex < STATE.manifest.slides.length - 1) {
+                    loadSlide(STATE.currentIndex + 1).then(() => {
+                        STATE.tourStep = 0;
+                        setTimeout(runTourStep, 1000);
+                    });
+                } else {
+                    STATE.tourActive = false;
+                    document.getElementById('tour-progress').textContent = 'Tour complete';
+                }
+                return;
+            }
+
+            const step = tour[STATE.tourStep];
+            document.getElementById('tour-progress').textContent = `Focusing: ${step.focusEntity}`;
+
+            // Find entity
+            const entity = entities.find(e => e.userData.id === step.focusEntity);
+            if (entity) {
+                const pos = entity.position;
+                const camDist = 50;
+                snapToPoint({
+                    cameraPos: [pos.x, pos.y + 10, pos.z + camDist],
+                    target: [pos.x, pos.y, pos.z]
+                });
+            }
+
+            STATE.tourStep++;
+            setTimeout(runTourStep, step.seconds * 1000);
+        }
+
+        function stopTour() {
+            STATE.tourActive = false;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // EVENTS
+        // ═══════════════════════════════════════════════════════════════════════════
+        function bindEvents() {
+            // Mode tabs
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.addEventListener('click', () => setMode(tab.dataset.mode));
+            });
+
+            // Navigation
+            document.getElementById('btn-prev').addEventListener('click', () => {
+                if (STATE.currentIndex > 0) loadSlide(STATE.currentIndex - 1);
+            });
+
+            document.getElementById('btn-next').addEventListener('click', () => {
+                if (STATE.currentIndex < STATE.manifest.slides.length - 1) loadSlide(STATE.currentIndex + 1);
+            });
+
+            document.getElementById('btn-tour').addEventListener('click', () => {
+                if (STATE.tourActive) {
+                    stopTour();
+                } else {
+                    setMode('trajectory');
+                }
+            });
+
+            // Screenshot
+            document.getElementById('btn-screenshot').addEventListener('click', () => {
+                renderer.render(scene, camera);
+                const link = document.createElement('a');
+                link.download = `shield-scene-${STATE.currentIndex + 1}.png`;
+                link.href = renderer.domElement.toDataURL('image/png');
+                link.click();
+            });
+
+            // Fullscreen
+            document.getElementById('btn-fullscreen').addEventListener('click', () => {
+                document.documentElement.requestFullscreen?.();
+            });
+
+            // Search
+            document.getElementById('search').addEventListener('input', (e) => {
+                STATE.filter = e.target.value;
+                renderSlideList();
+                if (STATE.mode === 'grid') renderGridView();
+            });
+
+            // Keyboard
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        if (STATE.currentIndex > 0) loadSlide(STATE.currentIndex - 1);
+                        break;
+                    case 'ArrowRight':
+                        if (STATE.currentIndex < STATE.manifest.slides.length - 1) loadSlide(STATE.currentIndex + 1);
+                        break;
+                    case 'g':
+                        setMode('grid');
+                        break;
+                    case 's':
+                        setMode('stack');
+                        break;
+                    case 'c':
+                        setMode('compare');
+                        break;
+                    case 't':
+                        setMode('trajectory');
+                        break;
+                    case 'f':
+                        document.documentElement.requestFullscreen?.();
+                        break;
+                    case 'Escape':
+                        stopTour();
+                        setMode('stack');
+                        break;
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // ANIMATION
+        // ═══════════════════════════════════════════════════════════════════════════
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+
+            // Motion effects
+            if (currentSceneData?.motion?.float?.enabled) {
+                const amp = currentSceneData.motion.float.amplitude;
+                const speed = currentSceneData.motion.float.speed;
+                entities.forEach((entity, i) => {
+                    if (entity.userData.type === 'cutoutPlane') {
+                        entity.position.y += Math.sin(time * speed + i) * 0.01 * amp;
+                    }
+                });
+            }
+
+            if (currentSceneData?.motion?.drift?.enabled) {
+                entities.forEach((entity, i) => {
+                    if (entity.userData.type === 'cutoutPlane') {
+                        entity.rotation.y = Math.sin(time * 0.3 + i * 0.5) * 0.02;
+                    }
+                });
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+
+            if (compareRenderer && STATE.mode === 'compare') {
+                compareControls.update();
+                compareRenderer.render(compareScene, compareCamera);
+            }
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>

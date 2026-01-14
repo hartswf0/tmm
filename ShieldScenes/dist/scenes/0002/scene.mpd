@@ -1,0 +1,39 @@
+0 FILE 0002.ldr
+0 Humanist Ontology Template
+0 Name: 0002.ldr
+0 Author: Grace Master Builder
+0 !LDRAW_ORG Model
+0 !LICENCE Redistributable under CCAL version 2.0
+0 BFC CERTIFY CCW
+0 //
+0 LEGOS FRAMEWORK:
+0 Location: The Schema Forge
+0 Entity: Template, Zone, Entities, Lighting
+0 Goal: Ensure Code Compliance
+0 Obstacle: Narrative Hallucination
+0 Shift: Narrative to Code
+0 //
+0 STEP 01: FLOOR
+1  15  0    0   0   1 0 0   0 1 0   0 0 1  3811.dat
+0 STEP
+0 STEP 02: SCHEMA PANEL
+0 // Large white panel for code
+1 15 0 -48 -40 1 0 0 0 1 0 0 0 1 3005.dat
+1 15 0 -48 -20 1 0 0 0 1 0 0 0 1 3005.dat
+1 15 0 -48 0   1 0 0 0 1 0 0 0 1 3005.dat
+1 15 0 -48 20  1 0 0 0 1 0 0 0 1 3005.dat
+1 15 0 -48 40  1 0 0 0 1 0 0 0 1 3005.dat
+0 STEP
+0 STEP 03: ICONS
+0 // Torch (Lighting)
+1 14 60 -24 -20 1 0 0 0 1 0 0 0 1 3959.dat
+0 // Lock (Constraints)
+1 0 60 -24 0 1 0 0 0 1 0 0 0 1 3010.dat
+0 // Music Note (Soundscape)
+1 0 60 -24 20 1 0 0 0 1 0 0 0 1 4073.dat
+0 STEP
+0 STEP 04: HUMANIST
+0 // Minifig studying the code
+1 0 -40 -24 0 1 0 0 0 1 0 0 0 1 3814.dat
+0 STEP
+0 NOFILE

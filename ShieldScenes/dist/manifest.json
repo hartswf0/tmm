@@ -1,0 +1,150 @@
+{
+  "title": "Shield of Achilles Production Pipeline",
+  "generated": "2026-01-14",
+  "slides": [
+    {
+      "id": "0001",
+      "title": "Slide 0001 - 1",
+      "source": "Shield of Achilles Production Pipeline/1.png",
+      "page": "pages/0001.png",
+      "scene": "scenes/0001/scene.json",
+      "mpd": "scenes/0001/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0002",
+      "title": "Slide 0002 - 2",
+      "source": "Shield of Achilles Production Pipeline/2.png",
+      "page": "pages/0002.png",
+      "scene": "scenes/0002/scene.json",
+      "mpd": "scenes/0002/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0003",
+      "title": "Slide 0003 - 3",
+      "source": "Shield of Achilles Production Pipeline/3.png",
+      "page": "pages/0003.png",
+      "scene": "scenes/0003/scene.json",
+      "mpd": "scenes/0003/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0004",
+      "title": "Slide 0004 - 4",
+      "source": "Shield of Achilles Production Pipeline/4.png",
+      "page": "pages/0004.png",
+      "scene": "scenes/0004/scene.json",
+      "mpd": "scenes/0004/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0005",
+      "title": "Slide 0005 - 5",
+      "source": "Shield of Achilles Production Pipeline/5.png",
+      "page": "pages/0005.png",
+      "scene": "scenes/0005/scene.json",
+      "mpd": "scenes/0005/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0006",
+      "title": "Slide 0006 - 6",
+      "source": "Shield of Achilles Production Pipeline/6.png",
+      "page": "pages/0006.png",
+      "scene": "scenes/0006/scene.json",
+      "mpd": "scenes/0006/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0007",
+      "title": "Slide 0007 - 7",
+      "source": "Shield of Achilles Production Pipeline/7.png",
+      "page": "pages/0007.png",
+      "scene": "scenes/0007/scene.json",
+      "mpd": "scenes/0007/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0008",
+      "title": "Slide 0008 - 8",
+      "source": "Shield of Achilles Production Pipeline/8.png",
+      "page": "pages/0008.png",
+      "scene": "scenes/0008/scene.json",
+      "mpd": "scenes/0008/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    },
+    {
+      "id": "0009",
+      "title": "Slide 0009 - 9",
+      "source": "Shield of Achilles Production Pipeline/9.png",
+      "page": "pages/0009.png",
+      "scene": "scenes/0009/scene.json",
+      "mpd": "scenes/0009/scene.mpd",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "cutouts": 8,
+      "tags": [
+        "minimal"
+      ]
+    }
+  ]
+}

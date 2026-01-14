@@ -1,0 +1,37 @@
+0 FILE 0003.ldr
+0 The Asset Loop: Techs
+0 Name: 0003.ldr
+0 Author: Grace Master Builder
+0 !LDRAW_ORG Model
+0 !LICENCE Redistributable under CCAL version 2.0
+0 BFC CERTIFY CCW
+0 //
+0 LEGOS FRAMEWORK:
+0 Location: The Latent Foundry
+0 Entity: Scraper, Network, Bronze Phone
+0 Goal: Achieve Museum Authenticity
+0 Obstacle: The Auden Glitch
+0 Shift: Embedding Authenticity
+0 //
+0 STEP 01: FLOOR
+1  71  0    0   0   1 0 0   0 1 0   0 0 1  3811.dat
+0 STEP
+0 STEP 02: SCRAPER FUNNEL
+1 15 -60 -24 0 1 0 0 0 1 0 0 0 1 4735.dat
+1 15 -60 -48 0 1 0 0 0 1 0 0 0 1 3942c.dat
+0 STEP
+0 STEP 03: NEURAL NETWORK
+1 72 0 -24 0 1 0 0 0 1 0 0 0 1 4744.dat
+1 72 0 -36 0 1 0 0 0 1 0 0 0 1 4744.dat
+1 72 0 -48 0 1 0 0 0 1 0 0 0 1 4744.dat
+0 STEP
+0 STEP 04: THE TEST (PHONES)
+0 // Fail Phone (Plastic/Red)
+1 4 60 -10 -20 1 0 0 0 1 0 0 0 1 3069b.dat
+0 // Pass Phone (Bronze/Green)
+1 2 60 -10 20  1 0 0 0 1 0 0 0 1 3069b.dat
+0 STEP
+0 STEP 05: TECH TEAM
+1 0 40 -24 0 0 0 1 0 1 0 -1 0 0 973.dat
+0 STEP
+0 NOFILE

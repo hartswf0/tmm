@@ -1,0 +1,36 @@
+0 FILE 0001.ldr
+0 Production Pipeline & Triage Strategy
+0 Name: 0001.ldr
+0 Author: Grace Master Builder
+0 !LDRAW_ORG Model
+0 !LICENCE Redistributable under CCAL version 2.0
+0 BFC CERTIFY CCW
+0 //
+0 LEGOS FRAMEWORK:
+0 Location: The Factory of Order
+0 Entity: Chaos, Triage Funnel, Production Engine, Artifact
+0 Goal: Establish Order from Chaos
+0 Obstacle: High Entropy of Ideas
+0 Shift: Iterative Refinement
+0 //
+0 STEP 01: FLOOR
+1  7   0    0   0   1 0 0   0 1 0   0 0 1  3811.dat
+0 STEP
+0 STEP 02: TRIAGE FUNNEL
+0 // Cone representing the intake
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3942c.dat
+1 14 0 -48 0 1 0 0 0 1 0 0 0 1 4735.dat
+0 STEP
+0 STEP 03: PRODUCTION GEARS
+0 // Technic gears for the engine
+1 72 40 -24 0 0 0 1 0 1 0 -1 0 0 3648.dat
+1 72 -40 -24 0 0 0 1 0 1 0 -1 0 0 3648.dat
+1 72 0 -24 40 1 0 0 0 0 -1 0 1 0 3648.dat
+0 STEP
+0 STEP 04: OUTPUT CRATES
+0 // Boxes for Schema, Substrate, Logic
+1 84 80 -10 -20 1 0 0 0 1 0 0 0 1 3005.dat
+1 84 80 -10 0   1 0 0 0 1 0 0 0 1 3005.dat
+1 84 80 -10 20  1 0 0 0 1 0 0 0 1 3005.dat
+0 STEP
+0 NOFILE

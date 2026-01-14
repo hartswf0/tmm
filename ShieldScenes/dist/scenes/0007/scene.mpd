@@ -1,0 +1,35 @@
+0 FILE 0007.ldr
+0 The Material Pipeline
+0 Name: 0007.ldr
+0 Author: Grace Master Builder
+0 !LDRAW_ORG Model
+0 !LICENCE Redistributable under CCAL version 2.0
+0 BFC CERTIFY CCW
+0 //
+0 LEGOS FRAMEWORK:
+0 Location: The Material Lab
+0 Entity: Generic Bot, Museum Ref, Texture Maps, Authentic Artifact
+0 Goal: Eliminating Plastic
+0 Obstacle: Hallucinated Aesthetics
+0 Shift: Inverse Rendering
+0 //
+0 STEP 01: FLOOR
+1  70   0    0   0   1 0 0   0 1 0   0 0 1  3811.dat
+0 STEP
+0 STEP 02: GENERIC BOT (Plastic)
+1 4 0 0 -24 0 1 0 0 0 1 0 0 0 1 973.dat
+0 STEP
+0 STEP 03: DATABASE (Museum Refs)
+1 14 -40 0 -24 1 0 0 0 1 0 0 0 1 3005.dat
+1 14 -40 10 -24 0 0 -1 0 1 0 1 0 0 3005.dat
+0 STEP
+0 STEP 04: TEXTURE MAPS
+0 // Tiles representing Roughness/Metallic
+1 0 40 0 -10 1 0 0 0 1 0 0 0 1 3068b.dat
+1 72 40 0 10 1 0 0 0 1 0 0 0 1 3068b.dat
+0 STEP
+0 STEP 05: AUTHENTIC ARTIFACT
+0 // Gold Ingot / Treasure
+1 296 0 0 24 1 0 0 0 1 0 0 0 1 99563.dat
+0 STEP
+0 NOFILE

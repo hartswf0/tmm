@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield Scene Forge - Hub</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #101015;
+            --border: #2a2a3a;
+            --accent: #c9a227;
+            --text: #e8e4d9;
+            --dim: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: var(--dim);
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.5;
+        }
+
+        .tools-nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .tool-link {
+            text-decoration: none;
+            color: var(--text);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 16px 32px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 180px;
+        }
+
+        .tool-link:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .tool-icon {
+            font-size: 24px;
+        }
+
+        .tool-name {
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .tool-desc {
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        /* Gallery */
+        .gallery-title {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--dim);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .scene-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .scene-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .scene-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .scene-info {
+            padding: 16px;
+        }
+
+        .scene-id {
+            color: var(--accent);
+            font-size: 10px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .scene-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .scene-tags {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            color: var(--dim);
+        }
+
+        /* Warning */
+        #protocol-warning {
+            display: none;
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid #ff3b30;
+            color: #ff3b30;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div id="protocol-warning">
+            ⚠️ <strong>Local Server Required</strong><br>
+            Browsers block loading external files (JSON/Images) via <code>file://</code> protocol.<br>
+            Please run: <code>python3 -m http.server 8000</code> and open <a href="http://localhost:8000"
+                style="color:inherit">http://localhost:8000</a>
+        </div>
+
+        <section class="hero">
+            <div class="logo">🛡️</div>
+            <h1>SHIELD SCENE FORGE</h1>
+            <p>Production Pipeline & Context Engineering<br>Spring 2026</p>
+
+            <div class="tools-nav">
+                <a href="slides.html" class="tool-link">
+                    <span class="tool-icon">🖼️</span>
+                    <span class="tool-name">THE DECK</span>
+                    <span class="tool-desc">Narrative & Specs</span>
+                </a>
+                <a href="annotate.html" class="tool-link">
+                    <span class="tool-icon">✏️</span>
+                    <span class="tool-name">ANNOTATE</span>
+                    <span class="tool-desc">Spatial Extraction</span>
+                </a>
+                <a href="viewer.html" class="tool-link">
+                    <span class="tool-icon">🧊</span>
+                    <span class="tool-name">EXPLORE 3D</span>
+                    <span class="tool-desc">Interactive Diorama</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="gallery">
+            <div class="gallery-title">Scene Manifest</div>
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Populated by JS -->
+                <div style="color:var(--dim); padding:20px; text-align:center;">Loading manifest...</div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Check protocol
+        if (window.location.protocol === 'file:') {
+            document.getElementById('protocol-warning').style.display = 'block';
+        }
+
+        async function init() {
+            try {
+                const res = await fetch('manifest.json');
+                const manifest = await res.json();
+                renderGallery(manifest.slides);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('gallery-grid').innerHTML = 
+                    `<div style="color:#ff3b30">Failed to load manifest.json. Ensure server is running.</div>`;
+            }
+        }
+
+        function renderGallery(slides) {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = slides.map((slide, i) => `
+                <a href="slides.html?slide=${i}" class="scene-card">
+                    <img src="${slide.page}" class="scene-thumb" loading="lazy">
+                    <div class="scene-info">
+                        <div class="scene-id">SCENE ${slide.id}</div>
+                        <div class="scene-name">${slide.title}</div>
+                        <div class="scene-tags">
+                            ${slide.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                            <span class="tag">${slide.cutouts} Layers</span>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

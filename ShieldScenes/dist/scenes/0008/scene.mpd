@@ -1,0 +1,32 @@
+0 FILE 0008.ldr
+0 The StageCraft Mandate
+0 Name: 0008.ldr
+0 Author: Grace Master Builder
+0 !LDRAW_ORG Model
+0 !LICENCE Redistributable under CCAL version 2.0
+0 BFC CERTIFY CCW
+0 //
+0 LEGOS FRAMEWORK:
+0 Location: The Architect's Table
+0 Entity: Mandate Scroll, Volume Block-out, Camera
+0 Goal: Guarantee Logic Alignment
+0 Obstacle: Scope Creep
+0 Shift: Locking the Geography
+0 //
+0 STEP 01: FLOOR
+1  15  0    0   0   1 0 0   0 1 0   0 0 1  3811.dat
+0 STEP
+0 STEP 02: THE MANDATE (Warning Sign)
+1 4 0 -40 -20 1 0 0 0 0 -1 0 1 0 3069b.dat
+0 STEP
+0 STEP 03: BLOCK-OUT SCENE (Miniature)
+0 // Rings
+1 7  -40 0 -10 1 0 0 0 1 0 0 0 1 4073.dat
+1 7  -40 0 -10 2 0 0 0 1 0 0 0 2 4073.dat
+0 // Fire Center
+1 4 -40 0 -10 1 0 0 0 1 0 0 0 1 3062b.dat
+0 STEP
+0 STEP 04: LOCKED CAMERA
+1 72 40 0 20 0 0 -1 0 1 0 1 0 0 30099.dat
+0 STEP
+0 NOFILE

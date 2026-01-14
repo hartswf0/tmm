@@ -1,0 +1,320 @@
+{
+  "id": "0002",
+  "title": "Humanist Ontology Template: Iliad 18",
+  "sourceImage": "../../pages/0002.png",
+  "canvasSize": [
+    1920,
+    1080
+  ],
+  "camera": {
+    "type": "perspective",
+    "fov": 45,
+    "position": [
+      0,
+      0,
+      230.39999999999998
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ],
+    "near": 1,
+    "far": 5000
+  },
+  "environment": {
+    "background": "#050505",
+    "fog": {
+      "enabled": true,
+      "near": 115.19999999999999,
+      "far": 691.1999999999999
+    },
+    "post": {
+      "bloom": true,
+      "vignette": true,
+      "filmGrain": 0.08
+    }
+  },
+  "lights": [
+    {
+      "type": "hemisphere",
+      "intensity": 0.55
+    },
+    {
+      "type": "directional",
+      "position": [
+        500,
+        900,
+        400
+      ],
+      "intensity": 1.1,
+      "shadows": true
+    },
+    {
+      "type": "point",
+      "position": [
+        -350,
+        200,
+        500
+      ],
+      "intensity": 0.45
+    }
+  ],
+  "assets": {
+    "textures": [
+      {
+        "id": "page",
+        "src": "../../pages/0002.png"
+      }
+    ],
+    "ldraw": []
+  },
+  "entities": [
+    {
+      "id": "bg",
+      "type": "plane",
+      "texture": "page",
+      "size": [
+        192.0,
+        108.0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": false,
+        "opacity": 1,
+        "emissive": 0.04
+      }
+    },
+    {
+      "id": "cut-01",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.08333333333333333,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        -64.0,
+        36.0,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.15
+      }
+    },
+    {
+      "id": "cut-02",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.4166666666666667,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        0.0,
+        36.0,
+        51.42857142857143
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.13999999999999999
+      }
+    },
+    {
+      "id": "cut-03",
+      "type": "cutoutPlane",
+      "fromTexture": "page",
+      "rectN": [
+        0.75,
+        0.08333333333333333,
+        0.16666666666666666,
+        0.16666666666666666
+      ],
+      "size": [
+        32.0,
+        18.0
+      ],
+      "position": [
+        64.0,
+        36.0,
+        82.85714285714286
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "material": {
+        "transparent": true,
+        "alphaMode": "mask",
+        "opacity": 1,
+        "emissive": 0.13
+      }
+    }
+  ],
+  "navigation": {
+    "snapPoints": [
+      {
+        "name": "front",
+        "cameraPos": [
+          0,
+          0,
+          230.39999999999998
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "oblique",
+        "cameraPos": [
+          115.19999999999999,
+          69.11999999999999,
+          184.32
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "tour": [
+      {
+        "focusEntity": "cut-01",
+        "seconds": 2.5
+      },
+      {
+        "focusEntity": "cut-02",
+        "seconds": 2.5
+      }
+    ]
+  },
+  "motion": {
+    "float": {
+      "enabled": true,
+      "amplitude": 1.6,
+      "speed": 0.25
+    },
+    "drift": {
+      "enabled": true,
+      "strength": 0.35
+    }
+  },
+  "legos": {
+    "title": "Humanist Ontology Template",
+    "description": "Code-Compliant Schema for Structured Graph Population.",
+    "location": "The Schema Forge",
+    "entities": [
+      {
+        "id": "e_template",
+        "type": "interface",
+        "name": "JSON Template",
+        "function": "definition"
+      },
+      {
+        "id": "e_zone",
+        "type": "data_field",
+        "name": "Zone ID",
+        "value": "City_at_Peace"
+      },
+      {
+        "id": "e_entities",
+        "type": "data_field",
+        "name": "Entities List",
+        "value": [
+          "Brides",
+          "Dancers"
+        ]
+      },
+      {
+        "id": "e_lighting",
+        "type": "data_field",
+        "name": "Lighting Condition",
+        "value": "Torchlight + Starlight"
+      }
+    ],
+    "goals": [
+      {
+        "id": "g_compliance",
+        "name": "Ensure Code Compliance",
+        "owner": "e_template"
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "o_ambiguity",
+        "name": "Narrative Hallucination",
+        "affects": "g_compliance"
+      }
+    ],
+    "shifts": [
+      {
+        "id": "s_codification",
+        "name": "Narrative to Code",
+        "causes": [
+          "e_template"
+        ],
+        "results_in": "g_compliance"
+      }
+    ],
+    "relations": [
+      "[defines] e_template -> e_zone",
+      "[restricts] e_template -> o_ambiguity"
+    ],
+    "timeline": [
+      {
+        "id": "t_schema",
+        "description": "Schema Population",
+        "scenes": [
+          {
+            "id": "sc_definition",
+            "description": "Defining the Zone and Entities"
+          },
+          {
+            "id": "sc_constraints",
+            "description": "Setting rules and constraints"
+          }
+        ]
+      }
+    ]
+  }
+}
