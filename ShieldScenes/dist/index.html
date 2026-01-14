@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shield Scene Forge - Hub</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <style>
         :root {
             --bg: #050505;
@@ -243,7 +244,7 @@
                 renderGallery(manifest.slides);
             } catch (e) {
                 console.error(e);
-                document.getElementById('gallery-grid').innerHTML = 
+                document.getElementById('gallery-grid').innerHTML =
                     `<div style="color:#ff3b30">Failed to load manifest.json. Ensure server is running.</div>`;
             }
         }

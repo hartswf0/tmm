@@ -1,0 +1,194 @@
+{
+    "families": [
+        {
+            "name": "Shield of Achilles",
+            "items": [
+                {
+                    "id": "shield-pipeline",
+                    "title": "Shield of Achilles Production Pipeline",
+                    "path": "Shield of Achilles Production Pipeline",
+                    "slides": 9,
+                    "tags": [
+                        "shield",
+                        "production"
+                    ],
+                    "grammar": "STRATA"
+                },
+                {
+                    "id": "fourth-shield",
+                    "title": "The Fourth Shield",
+                    "path": "The Fourth Shield",
+                    "slides": 9,
+                    "tags": [
+                        "shield",
+                        "theory"
+                    ],
+                    "grammar": "BURST"
+                },
+                {
+                    "id": "forge-shield",
+                    "title": "Forge the Fourth Shield",
+                    "path": "Forge the Fourth Shield",
+                    "slides": 9,
+                    "tags": [
+                        "shield",
+                        "forge"
+                    ],
+                    "grammar": "DECK"
+                }
+            ],
+            "radio": {
+                "mode": "ambient",
+                "tracks": []
+            }
+        },
+        {
+            "name": "Algorithmic Colonization",
+            "items": [
+                {
+                    "id": "algo-col-self",
+                    "title": "Algorithmic Colonization of Self",
+                    "path": "Algorithmic Colonization of Self",
+                    "slides": 9,
+                    "tags": [
+                        "ai",
+                        "identity"
+                    ],
+                    "grammar": "STRATA"
+                },
+                {
+                    "id": "algo-col-narrative",
+                    "title": "Algorithmic Colonization of the Narrative Self",
+                    "path": "Algorithmic Colonization of the Narrative Self",
+                    "slides": 9,
+                    "tags": [
+                        "ai",
+                        "narrative"
+                    ],
+                    "grammar": "DECK"
+                },
+                {
+                    "id": "algo-col-full",
+                    "title": "The Algorithmic Colonization of the Narrative Self",
+                    "path": "The Algorithmic Colonization of the Narrative Self",
+                    "slides": 27,
+                    "tags": [
+                        "ai",
+                        "narrative",
+                        "full"
+                    ],
+                    "grammar": "STRATA"
+                }
+            ],
+            "radio": {
+                "mode": "noise",
+                "tracks": []
+            }
+        },
+        {
+            "name": "Brick-Built Media",
+            "items": [
+                {
+                    "id": "brick-myths",
+                    "title": "Brick-Built Media Myths",
+                    "path": "Brick-Built Media Myths",
+                    "slides": 9,
+                    "tags": [
+                        "lego",
+                        "myth"
+                    ],
+                    "grammar": "BURST"
+                },
+                {
+                    "id": "brick-odyssey-1",
+                    "title": "Brick-Built Media Odyssey (1)",
+                    "path": "Brick-Built Media Odyssey (1)",
+                    "slides": 9,
+                    "tags": [
+                        "lego",
+                        "odyssey"
+                    ],
+                    "grammar": "DECK"
+                },
+                {
+                    "id": "brick-odyssey-2",
+                    "title": "Brick-Built Media Odyssey (2)",
+                    "path": "Brick-Built Media Odyssey (2)",
+                    "slides": 9,
+                    "tags": [
+                        "lego",
+                        "odyssey"
+                    ],
+                    "grammar": "DECK"
+                }
+            ],
+            "radio": {
+                "mode": "playlist",
+                "tracks": []
+            }
+        },
+        {
+            "name": "Crisis & Machines",
+            "items": [
+                {
+                    "id": "crisis-machines",
+                    "title": "Crisis Machines",
+                    "path": "Crisis Machines",
+                    "slides": 9,
+                    "tags": [
+                        "crisis",
+                        "technology"
+                    ],
+                    "grammar": "STRATA"
+                },
+                {
+                    "id": "crisis-html",
+                    "title": "Crisis Machines (HTML)",
+                    "path": "_mnt_okcomputer_output_crisis_machines.pptx.html (4) 2",
+                    "slides": 12,
+                    "tags": [
+                        "crisis",
+                        "html"
+                    ],
+                    "grammar": "DECK"
+                }
+            ],
+            "radio": {
+                "mode": "ambient",
+                "tracks": []
+            }
+        },
+        {
+            "name": "Architecture",
+            "items": [
+                {
+                    "id": "arch-agency",
+                    "title": "The Architecture of Agency",
+                    "path": "The Architecture of Agency",
+                    "slides": 9,
+                    "tags": [
+                        "agency",
+                        "architecture"
+                    ],
+                    "grammar": "STRATA"
+                }
+            ],
+            "radio": {
+                "mode": "ambient",
+                "tracks": []
+            }
+        }
+    ],
+    "radioStations": [
+        {
+            "id": "ambient",
+            "title": "Ambient Drone",
+            "tracks": []
+        },
+        {
+            "id": "noise",
+            "title": "Digital Noise",
+            "tracks": []
+        }
+    ]
+}
